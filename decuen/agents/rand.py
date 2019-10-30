@@ -5,7 +5,7 @@ from gym.spaces.space import Space  # type: ignore
 from decuen.agents.agent import Agent, Settings
 from decuen.memories.memory import Transition
 from decuen.memories.void import VoidMemory
-from decuen.policies.random import RandomPolicy
+from decuen.policies.rand import RandomPolicy
 
 
 class RandomAgent(Agent):
