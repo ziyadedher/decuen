@@ -36,6 +36,7 @@ class Agent(ABC):
     settings: Settings
 
     @abstractmethod
+    # pylint: disable=too-many-arguments
     def __init__(self, state_space: Space, action_space: Space,
                  memory: Memory, policy: Policy, settings: Settings) -> None:
         """Initialize a generic agent."""

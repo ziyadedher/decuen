@@ -35,16 +35,12 @@ pep257:
 pep8:
   run: true
   full: true
-  options:
-    max-line-length: 120
 
 pyflakes:
   run: true
 
 pylint:
   run: true
-  options:
-    max-line-length: 120
 
 pyroma:
   run: false
