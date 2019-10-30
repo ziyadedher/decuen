@@ -2,7 +2,8 @@
 
 from gym.spaces.space import Space  # type: ignore
 
-from decuen.agents.agent import Agent
+from decuen.agents.agent import Agent, Settings
+from decuen.memories.memory import Transition
 from decuen.memories.void import VoidMemory
 from decuen.policies.random import RandomPolicy
 
@@ -17,7 +18,8 @@ class RandomAgent(Agent):
         """Initialize a random agent."""
         memory = VoidMemory()
         policy = RandomPolicy(action_space)
-        super().__init__(state_space, action_space, memory, policy)
+        settings = Settings(0, 0, 0)
+        super().__init__(state_space, action_space, memory, policy, settings)
 
-    def learn(self) -> None:
+    def learn(self, transition: Transition) -> None:
         """Learn nothing as the random agent will remain random."""

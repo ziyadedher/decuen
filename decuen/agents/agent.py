@@ -1,12 +1,22 @@
 """Interface for arbitrary reinforcement learning agents."""
 
 from abc import ABC, abstractmethod
+from typing import NamedTuple
 
 import numpy as np  # type: ignore
 from gym.spaces.space import Space  # type: ignore
 
 from decuen.memories.memory import Memory, Transition
 from decuen.policies.policy import Policy
+
+
+class Settings(NamedTuple):
+    """Basic common hyperparameter settings for all agents."""
+
+    learning_rate: float
+    discount_factor: float
+
+    replay_size: int
 
 
 class Agent(ABC):
@@ -23,24 +33,27 @@ class Agent(ABC):
     action_space: Space
     memory: Memory
     policy: Policy
+    settings: Settings
 
     @abstractmethod
-    def __init__(self, state_space: Space, action_space: Space, memory: Memory, policy: Policy) -> None:
+    def __init__(self, state_space: Space, action_space: Space,
+                 memory: Memory, policy: Policy, settings: Settings) -> None:
         """Initialize a generic agent."""
         self.state_space = state_space
         self.action_space = action_space
         self.memory = memory
         self.policy = policy
+        self.settings = settings
 
     def experience(self, transition: Transition) -> None:
         """Experience a transition and potentially learn from it."""
         self._check_transition(transition)
         self.memory.store(transition)
-        self.learn()
+        self.learn(transition)
 
     @abstractmethod
-    def learn(self) -> None:
-        """Learn or improve policy from memory."""
+    def learn(self, transition: Transition) -> None:
+        """Learn or improve policy from memory with the most recent transition passed in."""
         ...
 
     def act(self, state: np.ndarray) -> np.ndarray:
