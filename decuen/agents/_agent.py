@@ -4,19 +4,17 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import numpy as np  # type: ignore
-from gym.spaces.space import Space  # type: ignore
+from gym import Space  # type: ignore
 
 from decuen.actors._actor import Actor
 from decuen.critics._critic import ActionCritic
 from decuen.memories._memory import Memory, Transition
+from decuen.utils import checks
 
 
 @dataclass
 class AgentSettings:
     """Basic common hyperparameter settings for all agents."""
-
-    learning_rate: float
-    discount_factor: float
 
     num_replay_transitions: int
     num_replay_trajectories: int
@@ -65,7 +63,7 @@ class Agent:
     def step(self, state: np.ndarray, reward: Optional[float] = None, terminal: Optional[bool] = None, *,
              learn: bool = True) -> np.ndarray:
         """Step based on a new state and a previous reward and end if they exist."""
-        self._check_state(state)
+        checks.check_state(self.state_space, state)
 
         action = self.act(state)
 
@@ -99,11 +97,11 @@ class Agent:
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """Generate an action to perform based on a state."""
-        self._check_state(state)
+        checks.check_state(self.state_space, state)
 
         action = self.actor.act(state)
 
-        self._check_action(action)
+        checks.check_action(self.action_space, action)
         return action
 
     def learn(self) -> None:
@@ -113,9 +111,11 @@ class Agent:
 
         for transition in transitions:
             self._populate_values(transition)
+            checks.check_transition(self.state_space, self.action_space, transition)
         for trajectory in trajectories:
             for transition in trajectory:
                 self._populate_values(transition)
+                checks.check_transition(self.state_space, self.action_space, transition)
 
         if transitions:
             self.critic.learn(transitions)
@@ -126,28 +126,3 @@ class Agent:
         """Populate the critic fields in a transition based on the current critic."""
         # TODO: support state critic and action critic
         transition.state_value = self.critic.crit(transition.state, transition.action)
-
-    def _check_state(self, state: np.ndarray) -> None:
-        """Check that a state is an appropriate input to this agent.
-
-        Raises a `ValueError` if the state is malformed, i.e not part of the state space.
-        """
-        if state not in self.state_space:
-            raise ValueError(f"state `{state}` is not in the agent state space `{self.state_space}`")
-
-    def _check_action(self, action: np.ndarray) -> None:
-        """Check that an action is an appropriate output from this agent.
-
-        Raises a `ValueError` if the action is malformed, i.e not part of the action space.
-        """
-        if action not in self.action_space:
-            raise ValueError(f"action `{action}` is not in the agent state space `{self.action_space}`")
-
-    def _check_transition(self, transition: Transition) -> None:
-        """Check that a transition is an appropriate experience for this agent.
-
-        Raises a `ValueError` if the transition is not valid, i.e. some state or action in it is malformed.
-        """
-        self._check_state(transition.state)
-        self._check_action(transition.action)
-        self._check_state(transition.new_state)
