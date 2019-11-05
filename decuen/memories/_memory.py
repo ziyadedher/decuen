@@ -6,7 +6,8 @@ from typing import (Generic, Iterable, MutableSequence, Optional, Sequence,
                     TypeVar)
 
 import numpy as np  # type: ignore
-from scipy.stats._distn_infrastructure import rv_frozen  # type: ignore
+
+from decuen.dists._distribution import Distribution
 
 
 @dataclass
@@ -19,7 +20,7 @@ class Transition:
     reward: float
     terminal: bool
 
-    behavior: Optional[rv_frozen] = None
+    behavior: Optional[Distribution] = None
     state_value: Optional[float] = None
     action_value: Optional[float] = None
 
