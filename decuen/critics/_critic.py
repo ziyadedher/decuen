@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Iterable
 
 import numpy as np  # type: ignore
+from gym import Space  # type: ignore
 
 from decuen.memories._memory import Transition
 
@@ -12,6 +13,9 @@ from decuen.memories._memory import Transition
 @dataclass
 class CriticSettings:
     """Basic common settings for all critics."""
+
+    discount_factor: float
+    learning_rate: float
 
 
 @dataclass
@@ -37,10 +41,14 @@ class Critic(ABC):
     based critics: the ability to learn based on past transitions and trajectories to improve critical accuracy.
     """
 
+    state_space: Space
+    action_space: Space
     settings: CriticSettings
 
-    def __init__(self, settings: CriticSettings) -> None:
+    def __init__(self, state_space: Space, action_space: Space, settings: CriticSettings) -> None:
         """Initialize this generic critic interface."""
+        self.state_space = state_space
+        self.action_space = action_space
         self.settings = settings
 
     # TODO: support learning from trajectories
@@ -60,9 +68,9 @@ class StateCritic(Critic):
 
     settings: StateCriticSettings
 
-    def __init__(self, settings: StateCriticSettings) -> None:
+    def __init__(self, state_space: Space, action_space: Space, settings: StateCriticSettings) -> None:
         """Initialize this generic state critic interface."""
-        super().__init__(settings)
+        super().__init__(state_space, action_space, settings)
 
     @abstractmethod
     def crit(self, state: np.ndarray) -> float:
@@ -80,9 +88,9 @@ class ActionCritic(Critic):
 
     settings: ActionCriticSettings
 
-    def __init__(self, settings: ActionCriticSettings) -> None:
+    def __init__(self, state_space: Space, action_space: Space, settings: ActionCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
-        super().__init__(settings)
+        super().__init__(state_space, action_space, settings)
 
     @abstractmethod
     def crit(self, state: np.ndarray, action: np.ndarray) -> float:
