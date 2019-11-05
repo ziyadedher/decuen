@@ -50,6 +50,9 @@ class Agent(ABC):
         self.action_space = action_space
         self.memory = memory
         self.settings = settings
+
+        self._state = None
+        self._action = None
         self._trajectory = []
 
     def step(self, state: np.ndarray, reward: Optional[float] = None, terminal: Optional[bool] = None, *,
