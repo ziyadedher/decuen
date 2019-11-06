@@ -1,7 +1,7 @@
 """Collection of simple checks and exceptions for use around the library."""
 
 import numpy as np  # type: ignore
-from gym.spaces import Discrete, Space  # type: ignore
+from gym.spaces import Space  # type: ignore
 
 from decuen.memories._memory import Transition
 
