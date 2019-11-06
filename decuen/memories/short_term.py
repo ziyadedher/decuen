@@ -18,15 +18,19 @@ class ShortTermMemory(Memory[List[Transition], List[Trajectory]]):
         """Initialize a short-term memory mechanism."""
         super().__init__([], [])
 
+    # pylint: disable=useless-super-delegation
     def store_transition(self, transition: Transition) -> None:
         """Store nothing in long-term transition memory."""
+        super().store_transition(transition)
 
     def replay_transitions(self, num: int) -> List[Transition]:
         """Replay the most recently stored single transition."""
         return [self.transition] if self.transition else []
 
+    # pylint: disable=useless-super-delegation
     def store_trajectory(self, trajectory: Trajectory) -> None:
         """Store nothing in long-term trajectory memory."""
+        super().store_trajectory(trajectory)
 
     def replay_trajectories(self, num: int) -> List[Trajectory]:
         """Replay the most recently stored single trajectory."""
