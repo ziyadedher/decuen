@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Collection
 
 import numpy as np  # type: ignore
 from gym import Space  # type: ignore
@@ -53,7 +53,7 @@ class Critic(ABC):
     # TODO: support learning from trajectories
     # XXX: possibly return loss or some other metric?
     @abstractmethod
-    def learn(self, transitions: Iterable[Transition]) -> None:
+    def learn(self, transitions: Collection[Transition]) -> None:
         """Update internal critic representation based on past transitions."""
         ...
 
