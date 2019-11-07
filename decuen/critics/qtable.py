@@ -25,10 +25,13 @@ from decuen.utils import checks
 class QTableCriticSettings(ActionCriticSettings):
     """Settings for Q-table critics."""
 
+    learning_rate: float
+
 
 class QTableCritic(ActionCritic):
     """Q-table critic based on [1]."""
 
+    settings: QTableCriticSettings
     table: np.ndarray
 
     def __init__(self, state_space: Discrete, action_space: Discrete, settings: QTableCriticSettings) -> None:
@@ -41,7 +44,7 @@ class QTableCritic(ActionCritic):
         if not isinstance(action_space, Discrete):
             raise TypeError("action space for Q-table critic must be discrete")
 
-        # XXX: possibly experiment with different intiialization techniques
+        # XXX: possibly experiment with different initialization techniques
         self.table = np.zeros((state_space.n, action_space.n))
 
     def learn(self, transitions: Iterable[Transition]) -> None:

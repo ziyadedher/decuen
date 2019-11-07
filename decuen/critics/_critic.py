@@ -15,7 +15,6 @@ class CriticSettings:
     """Basic common settings for all critics."""
 
     discount_factor: float
-    learning_rate: float
 
 
 @dataclass
