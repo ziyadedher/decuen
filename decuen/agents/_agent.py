@@ -10,6 +10,8 @@ from gym.spaces import Discrete, Space  # type: ignore
 from decuen.actors._actor import Actor
 from decuen.critics._critic import ActionCritic
 from decuen.memories._memory import Memory, Transition
+from decuen.strategies._strategy import Strategy
+from decuen.strategies.rand import RandomStrategy
 from decuen.utils import checks
 
 
@@ -152,14 +154,16 @@ class CriticAgent(Agent):
     """
 
     critic: ActionCritic
+    strategy: Strategy
 
     # TODO: support state critic and action critic
     # pylint: disable=too-many-arguments
     def __init__(self, state_space: Space, action_space: Space, settings: AgentSettings, memory: Memory,
-                 critic: ActionCritic) -> None:
+                 critic: ActionCritic, strategy: Strategy) -> None:
         """Initialize a generic critic agent."""
         super().__init__(state_space, action_space, settings, memory)
         self.critic = critic
+        self.strategy = strategy
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """Generate an action to perform based on a state.
@@ -172,7 +176,7 @@ class CriticAgent(Agent):
         # TODO: support sampling mechanism to get around needing the action space to be discrete
         if not isinstance(self.action_space, Discrete):
             raise TypeError("critic agent acting is only supported for discrete action spaces")
-        return max((action for action in self.action_space.n), key=lambda action: self.critic.crit(state, action))
+        return self.strategy.choose([self.critic.crit(state, action) for action in self.action_space.n])
 
     def learn(self) -> None:
         """Learn or improve this agent from memory.
@@ -206,7 +210,8 @@ class ActorCriticAgent(ActorAgent, CriticAgent):
                  actor: Actor, critic: ActionCritic) -> None:
         """Initialize a generic actor-critic agent."""
         ActorAgent.__init__(self, state_space, action_space, settings, memory, actor)
-        CriticAgent.__init__(self, state_space, action_space, settings, memory, critic)
+        # Note that strategy does nothing in this case since we are never calling the `act` of the `CriticAgent`
+        CriticAgent.__init__(self, state_space, action_space, settings, memory, critic, RandomStrategy())
         self.actor = actor
         self.critic = critic
 
