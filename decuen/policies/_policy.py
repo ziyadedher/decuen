@@ -1,22 +1,11 @@
 """Interface for arbitrary policies for reinforcement learning agents."""
 
-from typing import Any, Callable, Generic, Type, TypeVar
+from typing import Callable, Type
 
 import numpy as np  # type: ignore
 
 from decuen.dists._distribution import Distribution
-
-CallableType = TypeVar("CallableType")
-
-
-class _FunctionProperty(Generic[CallableType]):
-    """Wrapper class to provide ability to store functions as class properties."""
-
-    def __get__(self, oself: Any, owner: Any) -> CallableType:
-        ...
-
-    def __set__(self, oself: Any, value: CallableType) -> None:
-        ...
+from decuen.utils.function_property import _FunctionProperty
 
 
 class Policy:
