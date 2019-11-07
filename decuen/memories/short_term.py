@@ -8,7 +8,7 @@ from typing import List
 from decuen.memories._memory import Memory, Trajectory, Transition
 
 
-class ShortTermMemory(Memory[List[Transition], List[Trajectory]]):
+class ShortTermMemory(Memory):
     """Short term memory manager, only stores the most recent events and forgets everything else.
 
     Can be used for agents that do not require the use of any past memories like most on-policy algorithms.
@@ -23,8 +23,7 @@ class ShortTermMemory(Memory[List[Transition], List[Trajectory]]):
         """Store nothing in long-term transition memory."""
         super().store_transition(transition)
 
-    def replay_transitions(self, num: int) -> List[Transition]:
-        """Replay the most recently stored single transition."""
+    def _replay_transitions(self, num: int) -> List[Transition]:
         return [self.transition] if self.transition else []
 
     # pylint: disable=useless-super-delegation
@@ -32,6 +31,5 @@ class ShortTermMemory(Memory[List[Transition], List[Trajectory]]):
         """Store nothing in long-term trajectory memory."""
         super().store_trajectory(trajectory)
 
-    def replay_trajectories(self, num: int) -> List[Trajectory]:
-        """Replay the most recently stored single trajectory."""
+    def _replay_trajectories(self, num: int = None) -> List[Trajectory]:
         return [self.trajectory] if self.trajectory else []

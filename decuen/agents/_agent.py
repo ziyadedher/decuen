@@ -19,9 +19,6 @@ from decuen.utils import checks
 class AgentSettings:
     """Basic common hyperparameter settings for all agents."""
 
-    num_replay_transitions: int = 1
-    num_replay_trajectories: int = 1
-
 
 class Agent(ABC):
     """High-level reinforcement learning agent abstraction.
@@ -136,7 +133,7 @@ class ActorAgent(Agent):
 
         Delegates learning to the actor which learns to generate better actions.
         """
-        trajectories = self.memory.replay_trajectories(self.settings.num_replay_trajectories)
+        trajectories = self.memory.replay_trajectories()
 
         for trajectory in trajectories:
             for transition in trajectory:
@@ -183,7 +180,7 @@ class CriticAgent(Agent):
 
         Delegates learning to the critic which learns more accurate state or action values.
         """
-        transitions = self.memory.replay_transitions(self.settings.num_replay_transitions)
+        transitions = self.memory.replay_transitions()
 
         for transition in transitions:
             self._populate_values(transition)

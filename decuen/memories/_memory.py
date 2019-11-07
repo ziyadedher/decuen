@@ -2,8 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import (Generic, Iterable, MutableSequence, Optional, Sequence,
-                    TypeVar)
+from typing import Iterable, MutableSequence, Optional, Sequence
 
 import numpy as np  # type: ignore
 
@@ -27,11 +26,8 @@ class Transition:
 
 Trajectory = Sequence[Transition]
 
-TransitionBufferType = TypeVar("TransitionBufferType", bound=MutableSequence[Transition])
-TrajectoryBufferType = TypeVar("TrajectoryBufferType", bound=MutableSequence[Trajectory])
 
-
-class Memory(Generic[TransitionBufferType, TrajectoryBufferType], ABC):
+class Memory(ABC):
     """Generic abstract memory storage and management unit for an agent.
 
     This abstraction provides interfaces for the main functionalities of a memory mechanism:
@@ -43,14 +39,20 @@ class Memory(Generic[TransitionBufferType, TrajectoryBufferType], ABC):
 
     transition: Optional[Transition]
     trajectory: Optional[Trajectory]
+    transition_replay_num: int
+    trajectory_replay_num: int
 
-    _transition_buffer: TransitionBufferType
-    _trajectory_buffer: TrajectoryBufferType
+    _transition_buffer: MutableSequence[Transition]
+    _trajectory_buffer: MutableSequence[Trajectory]
 
-    def __init__(self, transition_buffer: TransitionBufferType, trajectory_buffer: TrajectoryBufferType) -> None:
+    def __init__(self,
+                 transition_buffer: MutableSequence[Transition], trajectory_buffer: MutableSequence[Trajectory],
+                 transition_replay_num: int = 1, trajectory_replay_num: int = 1) -> None:
         """Initialize a generic memory mechanism."""
         self.transition = None
         self.trajectory = None
+        self.transition_replay_num = transition_replay_num
+        self.trajectory_replay_num = trajectory_replay_num
         self._transition_buffer = transition_buffer
         self._trajectory_buffer = trajectory_buffer
 
@@ -59,9 +61,14 @@ class Memory(Generic[TransitionBufferType, TrajectoryBufferType], ABC):
         """Store a transition in this memory mechanism's buffer with any needed associated information."""
         self.transition = transition
 
-    @abstractmethod
-    def replay_transitions(self, num: int) -> Iterable[Transition]:
+    def replay_transitions(self, num: Optional[int] = None) -> Iterable[Transition]:
         """Replay experiences from our memory buffer based on some mechanism."""
+        if num is None:
+            return self._replay_transitions(self.transition_replay_num)
+        return self._replay_transitions(num)
+
+    @abstractmethod
+    def _replay_transitions(self, num: int) -> Iterable[Transition]:
         ...
 
     @abstractmethod
@@ -69,7 +76,12 @@ class Memory(Generic[TransitionBufferType, TrajectoryBufferType], ABC):
         """Store a trajectory in this memory mechanism's buffer consisting of a sequence of transitions."""
         self.trajectory = trajectory
 
-    @abstractmethod
-    def replay_trajectories(self, num: int) -> Iterable[Trajectory]:
+    def replay_trajectories(self, num: Optional[int] = None) -> Iterable[Trajectory]:
         """Replay trajectories from our memory buffer based on some mechanism."""
+        if num is None:
+            return self._replay_trajectories(self.trajectory_replay_num)
+        return self._replay_trajectories(num)
+
+    @abstractmethod
+    def _replay_trajectories(self, num: int) -> Iterable[Trajectory]:
         ...
