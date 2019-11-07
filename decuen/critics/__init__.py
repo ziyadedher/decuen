@@ -3,5 +3,11 @@
 from decuen.critics._critic import (ActionCritic, ActionCriticSettings, Critic,
                                     CriticSettings, StateCritic,
                                     StateCriticSettings)
+from decuen.critics.dqn import DQNCritic, DQNCriticSettings
+from decuen.critics.qtable import QTableCritic, QTableCriticSettings
 
-__all__ = ["Critic", "CriticSettings", "StateCritic", "StateCriticSettings", "ActionCritic", "ActionCriticSettings"]
+__all__ = [
+    "Critic", "CriticSettings", "StateCritic", "StateCriticSettings", "ActionCritic", "ActionCriticSettings",
+    "DQNCritic", "DQNCriticSettings",
+    "QTableCritic", "QTableCriticSettings",
+]
