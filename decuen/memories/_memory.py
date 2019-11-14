@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Iterable, MutableSequence, Optional, Sequence
+from typing import MutableSequence, Optional, Sequence
 
 import numpy as np  # type: ignore
 
@@ -61,14 +61,14 @@ class Memory(ABC):
         """Store a transition in this memory mechanism's buffer with any needed associated information."""
         self.transition = transition
 
-    def replay_transitions(self, num: Optional[int] = None) -> Iterable[Transition]:
+    def replay_transitions(self, num: Optional[int] = None) -> MutableSequence[Transition]:
         """Replay experiences from our memory buffer based on some mechanism."""
         if num is None:
             return self._replay_transitions(self.transition_replay_num)
         return self._replay_transitions(num)
 
     @abstractmethod
-    def _replay_transitions(self, num: int) -> Iterable[Transition]:
+    def _replay_transitions(self, num: int) -> MutableSequence[Transition]:
         ...
 
     @abstractmethod
@@ -76,12 +76,12 @@ class Memory(ABC):
         """Store a trajectory in this memory mechanism's buffer consisting of a sequence of transitions."""
         self.trajectory = trajectory
 
-    def replay_trajectories(self, num: Optional[int] = None) -> Iterable[Trajectory]:
+    def replay_trajectories(self, num: Optional[int] = None) -> MutableSequence[Trajectory]:
         """Replay trajectories from our memory buffer based on some mechanism."""
         if num is None:
             return self._replay_trajectories(self.trajectory_replay_num)
         return self._replay_trajectories(num)
 
     @abstractmethod
-    def _replay_trajectories(self, num: int) -> Iterable[Trajectory]:
+    def _replay_trajectories(self, num: int) -> MutableSequence[Trajectory]:
         ...

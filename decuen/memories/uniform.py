@@ -1,7 +1,7 @@
 """Implementation of a possibly bounded uniform experience replay manager."""
 
 import random
-from typing import Iterable, Optional
+from typing import List, Optional
 
 from decuen.memories._memory import Memory, Trajectory, Transition
 
@@ -26,7 +26,7 @@ class UniformMemory(Memory):
             self._transition_buffer.pop(0)
         self._transition_buffer.append(transition)
 
-    def _replay_transitions(self, num: int) -> Iterable[Transition]:
+    def _replay_transitions(self, num: int) -> List[Transition]:
         return random.choices(self._transition_buffer, k=num)
 
     def store_trajectory(self, trajectory: Trajectory) -> None:
@@ -36,5 +36,5 @@ class UniformMemory(Memory):
             self._trajectory_buffer.pop(0)
         self._trajectory_buffer.append(trajectory)
 
-    def _replay_trajectories(self, num: int) -> Iterable[Trajectory]:
+    def _replay_trajectories(self, num: int) -> List[Trajectory]:
         return random.choices(self._trajectory_buffer, k=num)
