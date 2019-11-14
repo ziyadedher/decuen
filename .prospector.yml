@@ -41,6 +41,8 @@ pyflakes:
 
 pylint:
   run: true
+  options:
+    ignored-modules: tensorflow.keras
 
 pyroma:
   run: false
