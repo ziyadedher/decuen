@@ -11,7 +11,7 @@ Implements both Q-learning [1] and Double Q-learning [2] algorithms to train act
 """
 
 from dataclasses import dataclass
-from typing import Collection
+from typing import MutableSequence
 
 import numpy as np  # type: ignore
 from gym.spaces import Discrete  # type: ignore
@@ -47,7 +47,7 @@ class QTableCritic(ActionCritic):
         # XXX: possibly experiment with different initialization techniques
         self.table = np.zeros((state_space.n, action_space.n))
 
-    def learn(self, transitions: Collection[Transition]) -> None:
+    def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions.
 
         Utilizes a simple value iteration update using a weighted average of the old value and the new information.

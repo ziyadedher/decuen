@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Iterable, Optional
+from typing import MutableSequence, Optional
 
 import numpy as np  # type: ignore
 
@@ -39,7 +39,7 @@ class Actor(ABC):
     # TODO: support learning from transitions
     # XXX: possibly return loss or some other metric?
     @abstractmethod
-    def learn(self, trajectories: Iterable[Trajectory]) -> None:
+    def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
         """Update policy based on past trajectories."""
         ...
 

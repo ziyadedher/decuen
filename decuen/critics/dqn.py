@@ -11,7 +11,7 @@ Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms
 """
 
 from dataclasses import dataclass
-from typing import Collection
+from typing import MutableSequence
 
 import numpy as np  # type: ignore
 from gym.spaces import Discrete, Space  # type: ignore
@@ -54,7 +54,7 @@ class DQNCritic(ActionCritic):
         self._finalize_model(model)
         self.network = model
 
-    def learn(self, transitions: Collection[Transition]) -> None:
+    def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions."""
         if not transitions:
             return
