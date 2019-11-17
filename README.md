@@ -41,6 +41,11 @@ Installing `decuen` from source is very simple given the framework is entirely w
 
 
 ## Usage
+After installing `decuen`, the framework is completely ready to be used. Detailed usage instructions, tutorials, examples, and more can be found in the [Decuen Wiki](https://github.com/ziyadedher/decuen/wiki).
 
 
 ## Development
+After installing `decuen` from source in your environment, there is a step to perform before the project is ready to be developed on:
+1. Reinstall `decuen` in editable mode with linting and testing libraries: `pip install -e '.[lint, test]'`.
+
+Now the project is ready to be developed. Note that in order to make sure that the CI/CD pipeline passes on your merge request, verify that our linter `prospector` does not produce any errors or warnings. You can also use `tox` to run the linter.
