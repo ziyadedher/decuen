@@ -22,11 +22,11 @@ class QTableAgent(CriticAgent):
     critic: QTableCritic
 
     # pylint: disable=too-many-arguments
-    def __init__(self, state_space: Discrete, action_space: Discrete, settings: QTableAgentSettings,
-                 memory: Memory, strategy: Strategy) -> None:
+    def __init__(self, state_space: Discrete, action_space: Discrete, memory: Memory, strategy: Strategy,
+                 settings: QTableAgentSettings = QTableAgentSettings()) -> None:
         """Initialize a Q-table critic agent."""
         critic = QTableCritic(state_space, action_space, settings)
-        super().__init__(state_space, action_space, settings, memory, critic, strategy)
+        super().__init__(state_space, action_space, memory, critic, strategy, settings)
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """Generate an action to perform based on the Q-values of different actions in a state."""
