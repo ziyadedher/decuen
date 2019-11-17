@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/images/logo.png">
+  <img src="https://github.com/ziyadedher/decuen/blob/develop/.github/images/logo.png?raw=true">
 </p>
 
 # Decuen
