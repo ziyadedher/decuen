@@ -43,12 +43,14 @@ class Critic(ABC):
     state_space: Space
     action_space: Space
     settings: CriticSettings
+    _learn_step: int
 
     def __init__(self, state_space: Space, action_space: Space, settings: CriticSettings) -> None:
         """Initialize this generic critic interface."""
         self.state_space = state_space
         self.action_space = action_space
         self.settings = settings
+        self._learn_step = 0
 
     # TODO: support learning from trajectories
     # XXX: possibly return loss or some other metric?

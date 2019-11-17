@@ -54,9 +54,20 @@ class Agent(ABC):
         self._action = None
         self._trajectory = []
 
-    def step(self, state: np.ndarray, reward: Optional[float] = None, terminal: Optional[bool] = None, *,
-             learn: bool = True) -> np.ndarray:
-        """Step based on a new state and a previous reward and end if they exist."""
+    def init(self, state: np.ndarray) -> np.ndarray:
+        """Initialize an agent at the start of a new episode."""
+        return self._step(state, None, None)
+
+    def step(self, state: np.ndarray, reward: float, terminal: bool) -> np.ndarray:
+        """Step based on a new state, a terminal state signal, and a reward signal.
+
+        Moves this agent forward in time and calculates transitions based on the state of the agent the last time step
+        was called. The reward signal corresponds to the transition that caused the migration to this state and the
+        terminal signal corresponds to the currently inputted state.
+        """
+        return self._step(state, reward, terminal)
+
+    def _step(self, state: np.ndarray, reward: Optional[float], terminal: Optional[bool]) -> np.ndarray:
         checks.check_state(self.state_space, state)
 
         action = self.act(state)
@@ -83,9 +94,6 @@ class Agent(ABC):
         else:
             self._state = state
             self._action = action
-
-        if learn:
-            self.learn()
 
         return action
 

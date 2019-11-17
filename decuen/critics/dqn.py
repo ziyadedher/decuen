@@ -16,10 +16,7 @@ from typing import MutableSequence
 import numpy as np  # type: ignore
 from gym.spaces import Discrete, Space  # type: ignore
 from tensorflow.keras import Sequential  # type: ignore
-from tensorflow.keras.activations import linear  # type: ignore
-from tensorflow.keras.layers import Dense  # type: ignore
-from tensorflow.keras.losses import mean_squared_error  # type: ignore
-from tensorflow.keras.optimizers import Optimizer  # type: ignore
+from tensorflow.keras.models import clone_model  # type: ignore
 
 from decuen.critics._critic import ActionCritic, ActionCriticSettings
 from decuen.memories._memory import Transition
@@ -30,7 +27,7 @@ from decuen.utils import checks
 class DQNCriticSettings(ActionCriticSettings):
     """Settings for Q-table critics."""
 
-    optimizer: Optimizer
+    target_update: int = 1
 
 
 class DQNCritic(ActionCritic):
@@ -41,6 +38,7 @@ class DQNCritic(ActionCritic):
 
     settings: DQNCriticSettings
     network: Sequential
+    _target_network: Sequential
 
     def __init__(self, state_space: Space, action_space: Discrete, settings: DQNCriticSettings,
                  model: Sequential) -> None:
@@ -51,11 +49,14 @@ class DQNCritic(ActionCritic):
         if not isinstance(action_space, Discrete):
             raise TypeError("action space for Q-table critic must be discrete")
 
-        self._finalize_model(model)
         self.network = model
+        self._target_network = clone_model(model)
+        self._target_network.set_weights(self.network.get_weights())
 
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions."""
+        self._learn_step += 1
+
         if not transitions:
             return
         for transition in transitions:
@@ -65,15 +66,18 @@ class DQNCritic(ActionCritic):
         new_states = np.array([transition.new_state for transition in transitions])
 
         values = self.network.predict_on_batch(states).numpy()
-        new_values = self.network.predict_on_batch(new_states).numpy()
+        target_values = self._target_network.predict_on_batch(new_states)
 
         for i, transition in enumerate(transitions):
             target = transition.reward
             if not transition.terminal:
-                target += self.settings.discount_factor * np.max(new_values[i])
+                target += self.settings.discount_factor * np.max(target_values[i])
             values[i][transition.action] = target
 
         self.network.train_on_batch(states, values)
+
+        if self._learn_step % self.settings.target_update == 0:
+            self._target_network.set_weights(self.network.get_weights())
 
     def crit(self, state: np.ndarray, action: np.ndarray) -> float:
         """Return the Q-value of taking a specific action in a specific state."""
@@ -87,12 +91,3 @@ class DQNCritic(ActionCritic):
         checks.check_state(self.state_space, state)
 
         return self.network.predict_on_batch(np.array([state]))[0].numpy()
-
-    def _finalize_model(self, model: Sequential) -> Sequential:
-        """Finalize a model for use as a Q-network and compile it.
-
-        Creates a new layer to serve as the final output Q-values layer and then compiles the entire keras model.
-        """
-        model.add(Dense(self.action_space.n, activation=linear))
-        # TODO: do something cooler with compile
-        model.compile(self.settings.optimizer, loss=mean_squared_error)
