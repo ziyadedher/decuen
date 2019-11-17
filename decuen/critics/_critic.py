@@ -14,7 +14,7 @@ from decuen.memories._memory import Transition
 class CriticSettings:
     """Basic common settings for all critics."""
 
-    discount_factor: float
+    discount_factor: float = 0.99
 
 
 @dataclass
@@ -45,7 +45,8 @@ class Critic(ABC):
     settings: CriticSettings
     _learn_step: int
 
-    def __init__(self, state_space: Space, action_space: Space, settings: CriticSettings) -> None:
+    def __init__(self, state_space: Space, action_space: Space,
+                 settings: CriticSettings = CriticSettings()) -> None:
         """Initialize this generic critic interface."""
         self.state_space = state_space
         self.action_space = action_space
@@ -69,7 +70,8 @@ class StateCritic(Critic):
 
     settings: StateCriticSettings
 
-    def __init__(self, state_space: Space, action_space: Space, settings: StateCriticSettings) -> None:
+    def __init__(self, state_space: Space, action_space: Space,
+                 settings: StateCriticSettings = StateCriticSettings()) -> None:
         """Initialize this generic state critic interface."""
         super().__init__(state_space, action_space, settings)
 
@@ -89,7 +91,8 @@ class ActionCritic(Critic):
 
     settings: ActionCriticSettings
 
-    def __init__(self, state_space: Space, action_space: Space, settings: ActionCriticSettings) -> None:
+    def __init__(self, state_space: Space, action_space: Space,
+                 settings: ActionCriticSettings = ActionCriticSettings()) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(state_space, action_space, settings)
 

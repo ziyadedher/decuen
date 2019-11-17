@@ -10,6 +10,7 @@ Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms
     https://arxiv.org/pdf/1509.06461.pdf
 """
 
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
@@ -30,18 +31,15 @@ class DQNCriticSettings(ActionCriticSettings):
     target_update: int = 1
 
 
-class DQNCritic(ActionCritic):
-    """Q-table critic based on [1, 2].
-
-    Implements Q-learning with or without target networks.
-    """
+class _DQNCritic(ActionCritic):
+    """Abstract DQN agent for common functionalities between DQN and DDQN."""
 
     settings: DQNCriticSettings
     network: Sequential
     _target_network: Sequential
 
-    def __init__(self, state_space: Space, action_space: Discrete, settings: DQNCriticSettings,
-                 model: Sequential) -> None:
+    def __init__(self, state_space: Space, action_space: Discrete, model: Sequential,
+                 settings: DQNCriticSettings = DQNCriticSettings()) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(state_space, action_space, settings)
 
@@ -52,6 +50,31 @@ class DQNCritic(ActionCritic):
         self.network = model
         self._target_network = clone_model(model)
         self._target_network.set_weights(self.network.get_weights())
+
+    @abstractmethod
+    def learn(self, transitions: MutableSequence[Transition]) -> None:
+        """Update internal critic representation based on past transitions."""
+        ...
+
+    def crit(self, state: np.ndarray, action: np.ndarray) -> float:
+        """Return the Q-value of taking a specific action in a specific state."""
+        checks.check_state(self.state_space, state)
+        checks.check_action(self.action_space, action)
+
+        return self.values(state)[action]
+
+    def values(self, state: np.ndarray) -> np.ndarray:
+        """Return an array of Q-values of all actions in a specific state."""
+        checks.check_state(self.state_space, state)
+
+        return self.network.predict_on_batch(np.array([state]))[0].numpy()
+
+
+class DQNCritic(_DQNCritic):
+    """Deep Q-network critic based on [1, 2].
+
+    Implements Q-learning with or without target networks.
+    """
 
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions."""
@@ -79,15 +102,36 @@ class DQNCritic(ActionCritic):
         if self._learn_step % self.settings.target_update == 0:
             self._target_network.set_weights(self.network.get_weights())
 
-    def crit(self, state: np.ndarray, action: np.ndarray) -> float:
-        """Return the Q-value of taking a specific action in a specific state."""
-        checks.check_state(self.state_space, state)
-        checks.check_action(self.action_space, action)
 
-        return self.values(state)[action]
+class DDQNCritic(_DQNCritic):
+    """Double deep Q-network critic based on [3].
 
-    def values(self, state: np.ndarray) -> np.ndarray:
-        """Return an array of Q-values of all actions in a specific state."""
-        checks.check_state(self.state_space, state)
+    Implements double Q-learning with target networks.
+    """
 
-        return self.network.predict_on_batch(np.array([state]))[0].numpy()
+    def learn(self, transitions: MutableSequence[Transition]) -> None:
+        """Update internal critic representation based on past transitions."""
+        self._learn_step += 1
+
+        if not transitions:
+            return
+        for transition in transitions:
+            checks.check_transition(self.state_space, self.action_space, transition)
+
+        states = np.array([transition.state for transition in transitions])
+        new_states = np.array([transition.new_state for transition in transitions])
+
+        values = self.network.predict_on_batch(states).numpy()
+        new_values = self.network.predict_on_batch(new_states).numpy()
+        target_new_values = self._target_network.predict_on_batch(new_states)
+
+        for i, transition in enumerate(transitions):
+            target = transition.reward
+            if not transition.terminal:
+                target += self.settings.discount_factor * new_values[i][np.argmax(target_new_values[i])]
+            values[i][transition.action] = target
+
+        self.network.train_on_batch(states, values)
+
+        if self._learn_step % self.settings.target_update == 0:
+            self._target_network.set_weights(self.network.get_weights())

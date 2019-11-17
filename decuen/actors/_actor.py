@@ -27,7 +27,8 @@ class Actor(ABC):
     policy: Policy
 
     @abstractmethod
-    def __init__(self, settings: ActorSettings, distribution: Optional[Distribution] = None) -> None:
+    def __init__(self, distribution: Optional[Distribution] = None,
+                 settings: ActorSettings = ActorSettings()) -> None:
         """Initialize a generic actor-learner."""
         self.policy = Policy(self._generate_policy_parameters,
                              distribution if distribution else self._choose_action_distribution())
