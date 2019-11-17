@@ -18,3 +18,11 @@ Decuen development and design is lead by [Ziyad Edher](https://github.com/ziyade
 ![GitHub forks](https://img.shields.io/github/forks/ziyadedher/decuen?style=social)
 ![GitHub stars](https://img.shields.io/github/stars/ziyadedher/decuen?style=social)
 ![GitHub watchers](https://img.shields.io/github/watchers/ziyadedher/decuen?style=social)
+
+
+## Principles
+The development of Decuen follows a small but effective set of guiding principles that attempts to span and encapsulate our vision of what Decuen is to be:
+* **Ease of use.** Decuen provides an API that follows existing standards, terminology, and intuitions popularized in modern reinforcement learning literature. Following these standards allows the usage of Decuen to come as second-nature to developers or researchers already familiar with reinforcement learning. Development of Decuen follows this standard to reduce the barrier-of-entry to using the framework.
+* **Extensibility.** Decuen is intended for quick, iterative development and experimentation of reinforcement learning systems, and as such the ability to easily extend Decuen source code is of utmost importance. Decuen achieves this by providing well-documented and typed source code with thoughtfully designed interfaces and abstractions.
+* **Modularity.** Decuen strives to be a tool for developers and researchers alike to be able to create reinforcement learning mechanisms without reinventing the wheel. Decuen implements all algorithms in a modular "building blocks" fashion to allow the plug-and-play of different modules in the larger system. This allows the independent design and development of new components to be tested as replacements for modules in current reinforcement learning systems. 
+* **Transparency.** Decuen strives to be as transparent as possible in its interfaces and abstractions to facilitate as many dimensions of change as possible. Abstractions, interfaces, and implementations are not closed-off and tend to provide as much information about internal processes as possible while abiding by our standard of modularity and extensibility.
