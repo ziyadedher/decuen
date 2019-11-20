@@ -1,30 +1,29 @@
-"""Deep Q-network critic based agent."""
-
+"""Q-value based agent."""
 
 from dataclasses import dataclass
 
 import numpy as np  # type: ignore
 
 from decuen.agents._agent import AgentSettings, CriticAgent
-from decuen.critics.dqn import _DQNCritic
+from decuen.critics._q import QCritic
 from decuen.memories._memory import Memory
 from decuen.strategies._strategy import Strategy
 
 
 @dataclass
-class DQNAgentSettings(AgentSettings):
-    """Settings for deep Q-network critic based agents."""
+class QAgentSettings(AgentSettings):
+    """Settings for Q-value critic based agents."""
 
 
-class DQNAgent(CriticAgent):
-    """Critic agent with only a deep Q-network based critic guiding action selection."""
+class QAgent(CriticAgent):
+    """Critic agent with only a Q-value based critic guiding action selection."""
 
-    critic: _DQNCritic
+    critic: QCritic
 
     # pylint: disable=too-many-arguments
-    def __init__(self, memory: Memory, critic: _DQNCritic, strategy: Strategy,
-                 settings: DQNAgentSettings = DQNAgentSettings()) -> None:
-        """Initialize a deep Q-network critic agent."""
+    def __init__(self, memory: Memory, critic: QCritic, strategy: Strategy,
+                 settings: QAgentSettings = QAgentSettings()) -> None:
+        """Initialize a Q-value based critic agent."""
         super().__init__(memory, critic, strategy, settings)
 
     def act(self, state: np.ndarray) -> np.ndarray:
