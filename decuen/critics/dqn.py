@@ -10,7 +10,6 @@ Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms
     https://arxiv.org/pdf/1509.06461.pdf
 """
 
-from abc import abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
