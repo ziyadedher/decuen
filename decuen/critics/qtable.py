@@ -16,19 +16,19 @@ from typing import MutableSequence
 import numpy as np  # type: ignore
 from gym.spaces import Discrete  # type: ignore
 
-from decuen.critics._critic import ActionCritic, ActionCriticSettings
+from decuen.critics._q import QCritic, QCriticSettings
 from decuen.memories._memory import Transition
 from decuen.utils import checks
 
 
 @dataclass
-class QTableCriticSettings(ActionCriticSettings):
+class QTableCriticSettings(QCriticSettings):
     """Settings for Q-table critics."""
 
     learning_rate: float = 0.01
 
 
-class QTableCritic(ActionCritic):
+class QTableCritic(QCritic):
     """Q-table critic based on [1]."""
 
     state_space: Discrete
@@ -49,6 +49,8 @@ class QTableCritic(ActionCritic):
         # XXX: possibly experiment with different initialization techniques
         self.table = np.zeros((self.state_space.n, self.action_space.n))
 
+    # TODO: implement target tables
+    # TODO: implement double Q-learning
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions.
 
