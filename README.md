@@ -30,8 +30,9 @@ The development of Decuen follows a small but effective set of guiding principle
 
 ## Installation
 #### Basic Installation
-Package is not yet released on PyPI for basic release installation.
-
+Installing `decuen` from PyPI is very simple, find the package [here](https://pypi.org/project/decuen/):
+0. Be in the environment you would like to install `decuen` in.
+1. Install `decuen` through `pip`: `pip install decuen`
 
 #### Source Installation
 Installing `decuen` from source is very simple given the framework is entirely written in modern Python:
