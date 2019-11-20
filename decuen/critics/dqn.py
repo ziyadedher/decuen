@@ -52,7 +52,6 @@ class DQNCritic(QCritic):
         self._target_network = clone_model(model)
         self._target_network.set_weights(self.network.get_weights())
 
-    @abstractmethod
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions."""
         self._learn_step += 1
