@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 
 import numpy as np  # type: ignore
-from gym.spaces import Discrete  # type: ignore
 
 from decuen.agents._agent import AgentSettings, CriticAgent
 from decuen.critics.qtable import QTableCritic, QTableCriticSettings
