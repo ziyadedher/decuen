@@ -31,22 +31,23 @@ class QTableCriticSettings(ActionCriticSettings):
 class QTableCritic(ActionCritic):
     """Q-table critic based on [1]."""
 
+    state_space: Discrete
+    action_space: Discrete
     settings: QTableCriticSettings
     table: np.ndarray
 
-    def __init__(self, state_space: Discrete, action_space: Discrete,
-                 settings: QTableCriticSettings = QTableCriticSettings()) -> None:
+    def __init__(self, settings: QTableCriticSettings = QTableCriticSettings()) -> None:
         """Initialize this generic actor critic interface."""
-        super().__init__(state_space, action_space, settings)
+        super().__init__(settings)
 
-        # TODO: possibly generalize to multi-discrete spaces
-        if not isinstance(state_space, Discrete):
+        # # TODO: possibly generalize to multi-discrete spaces
+        if not isinstance(self.state_space, Discrete):
             raise TypeError("state space for Q-table critic must be discrete")
-        if not isinstance(action_space, Discrete):
+        if not isinstance(self.action_space, Discrete):
             raise TypeError("action space for Q-table critic must be discrete")
 
         # XXX: possibly experiment with different initialization techniques
-        self.table = np.zeros((state_space.n, action_space.n))
+        self.table = np.zeros((self.state_space.n, self.action_space.n))
 
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions.

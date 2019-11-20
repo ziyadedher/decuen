@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import MutableSequence
 
 import numpy as np  # type: ignore
-from gym.spaces import Discrete, Space  # type: ignore
+from gym.spaces import Discrete  # type: ignore
 from tensorflow.keras import Sequential  # type: ignore
 from tensorflow.keras.models import clone_model  # type: ignore
 
@@ -34,17 +34,17 @@ class DQNCriticSettings(ActionCriticSettings):
 class _DQNCritic(ActionCritic):
     """Abstract DQN agent for common functionalities between DQN and DDQN."""
 
+    action_space: Discrete
     settings: DQNCriticSettings
     network: Sequential
     _target_network: Sequential
 
-    def __init__(self, state_space: Space, action_space: Discrete, model: Sequential,
-                 settings: DQNCriticSettings = DQNCriticSettings()) -> None:
+    def __init__(self, model: Sequential, settings: DQNCriticSettings = DQNCriticSettings()) -> None:
         """Initialize this generic actor critic interface."""
-        super().__init__(state_space, action_space, settings)
+        super().__init__(settings)
 
         # TODO: possibly generalize to multi-discrete spaces
-        if not isinstance(action_space, Discrete):
+        if not isinstance(self.action_space, Discrete):
             raise TypeError("action space for Q-table critic must be discrete")
 
         self.network = model

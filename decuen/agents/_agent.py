@@ -13,6 +13,7 @@ from decuen.memories._memory import Memory, Transition
 from decuen.strategies._strategy import Strategy
 from decuen.strategies.rand import RandomStrategy
 from decuen.utils import checks
+from decuen.utils.context import get_context
 
 
 @dataclass
@@ -43,11 +44,10 @@ class Agent(ABC):
     # Current agent trajectory
     _trajectory: List[Transition]
 
-    def __init__(self, state_space: Space, action_space: Space, memory: Memory,
-                 settings: AgentSettings = AgentSettings()) -> None:
+    def __init__(self, memory: Memory, settings: AgentSettings = AgentSettings()) -> None:
         """Initialize a generic agent."""
-        self.state_space = state_space
-        self.action_space = action_space
+        self.state_space = get_context().state_space
+        self.action_space = get_context().action_space
         self.memory = memory
         self.settings = settings
 
@@ -118,11 +118,9 @@ class ActorAgent(Agent):
 
     actor: Actor
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, state_space: Space, action_space: Space, memory: Memory, actor: Actor,
-                 settings: AgentSettings = AgentSettings()) -> None:
+    def __init__(self, memory: Memory, actor: Actor, settings: AgentSettings = AgentSettings()) -> None:
         """Initialize a generic actor agent."""
-        super().__init__(state_space, action_space, memory, settings)
+        super().__init__(memory, settings)
         self.actor = actor
 
     def act(self, state: np.ndarray) -> np.ndarray:
@@ -163,12 +161,10 @@ class CriticAgent(Agent):
     strategy: Strategy
 
     # TODO: support state critic and action critic
-    # pylint: disable=too-many-arguments
-    def __init__(self, state_space: Space, action_space: Space,
-                 memory: Memory, critic: ActionCritic, strategy: Strategy,
+    def __init__(self, memory: Memory, critic: ActionCritic, strategy: Strategy,
                  settings: AgentSettings = AgentSettings()) -> None:
         """Initialize a generic critic agent."""
-        super().__init__(state_space, action_space, memory, settings)
+        super().__init__(memory, settings)
         self.critic = critic
         self.strategy = strategy
 
@@ -212,14 +208,12 @@ class ActorCriticAgent(ActorAgent, CriticAgent):
     actor-critic framework from scratch as would be the case using a regular agent.
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, state_space: Space, action_space: Space,
-                 memory: Memory, actor: Actor, critic: ActionCritic,
+    def __init__(self, memory: Memory, actor: Actor, critic: ActionCritic,
                  settings: AgentSettings = AgentSettings()) -> None:
         """Initialize a generic actor-critic agent."""
-        ActorAgent.__init__(self, state_space, action_space, memory, actor, settings)
+        ActorAgent.__init__(self, memory, actor, settings)
         # Note that strategy does nothing in this case since we are never calling the `act` of the `CriticAgent`
-        CriticAgent.__init__(self, state_space, action_space, memory, critic, RandomStrategy(), settings)
+        CriticAgent.__init__(self, memory, critic, RandomStrategy(), settings)
         self.actor = actor
         self.critic = critic
 

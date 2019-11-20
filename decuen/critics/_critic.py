@@ -8,6 +8,7 @@ import numpy as np  # type: ignore
 from gym import Space  # type: ignore
 
 from decuen.memories._memory import Transition
+from decuen.utils.context import get_context
 
 
 @dataclass
@@ -45,11 +46,10 @@ class Critic(ABC):
     settings: CriticSettings
     _learn_step: int
 
-    def __init__(self, state_space: Space, action_space: Space,
-                 settings: CriticSettings = CriticSettings()) -> None:
+    def __init__(self, settings: CriticSettings = CriticSettings()) -> None:
         """Initialize this generic critic interface."""
-        self.state_space = state_space
-        self.action_space = action_space
+        self.state_space = get_context().state_space
+        self.action_space = get_context().action_space
         self.settings = settings
         self._learn_step = 0
 
@@ -70,10 +70,9 @@ class StateCritic(Critic):
 
     settings: StateCriticSettings
 
-    def __init__(self, state_space: Space, action_space: Space,
-                 settings: StateCriticSettings = StateCriticSettings()) -> None:
+    def __init__(self, settings: StateCriticSettings = StateCriticSettings()) -> None:
         """Initialize this generic state critic interface."""
-        super().__init__(state_space, action_space, settings)
+        super().__init__(settings)
 
     @abstractmethod
     def crit(self, state: np.ndarray) -> float:
@@ -91,10 +90,9 @@ class ActionCritic(Critic):
 
     settings: ActionCriticSettings
 
-    def __init__(self, state_space: Space, action_space: Space,
-                 settings: ActionCriticSettings = ActionCriticSettings()) -> None:
+    def __init__(self, settings: ActionCriticSettings = ActionCriticSettings()) -> None:
         """Initialize this generic actor critic interface."""
-        super().__init__(state_space, action_space, settings)
+        super().__init__(settings)
 
     @abstractmethod
     def crit(self, state: np.ndarray, action: np.ndarray) -> float:

@@ -4,7 +4,6 @@
 from dataclasses import dataclass
 
 import numpy as np  # type: ignore
-from gym.spaces import Discrete  # type: ignore
 
 from decuen.agents._agent import AgentSettings, CriticAgent
 from decuen.critics.dqn import _DQNCritic
@@ -23,11 +22,10 @@ class DQNAgent(CriticAgent):
     critic: _DQNCritic
 
     # pylint: disable=too-many-arguments
-    def __init__(self, state_space: Discrete, action_space: Discrete,
-                 memory: Memory, critic: _DQNCritic, strategy: Strategy,
+    def __init__(self, memory: Memory, critic: _DQNCritic, strategy: Strategy,
                  settings: DQNAgentSettings = DQNAgentSettings()) -> None:
         """Initialize a deep Q-network critic agent."""
-        super().__init__(state_space, action_space, memory, critic, strategy, settings)
+        super().__init__(memory, critic, strategy, settings)
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """Generate an action to perform based on the Q-values of different actions in a state."""
