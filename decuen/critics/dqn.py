@@ -10,7 +10,6 @@ Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms
     https://arxiv.org/pdf/1509.06461.pdf
 """
 
-from abc import abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
@@ -40,7 +39,7 @@ class DQNCritic(QCritic):
     network: Sequential
     _target_network: Sequential
 
-    def __init__(self, model: Sequential, settings: DQNCriticSettings = DQNCriticSettings()) -> None:
+    def __init__(self, model: Sequential, settings: DQNCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 

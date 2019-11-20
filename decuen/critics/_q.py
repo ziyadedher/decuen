@@ -24,7 +24,7 @@ class QCriticSettings(ActionCriticSettings):
 class QCritic(ActionCritic):
     """Abstract Q-value based critic to be used for building implementations of Q-value based critics."""
 
-    def __init__(self, settings: QCriticSettings = QCriticSettings()) -> None:
+    def __init__(self, settings: QCriticSettings) -> None:
         """Initialize an abstract Q-value based critic."""
         super().__init__(settings)
 

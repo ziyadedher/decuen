@@ -21,8 +21,7 @@ class QAgent(CriticAgent):
     critic: QCritic
 
     # pylint: disable=too-many-arguments
-    def __init__(self, memory: Memory, critic: QCritic, strategy: Strategy,
-                 settings: QAgentSettings = QAgentSettings()) -> None:
+    def __init__(self, memory: Memory, critic: QCritic, strategy: Strategy, settings: QAgentSettings) -> None:
         """Initialize a Q-value based critic agent."""
         super().__init__(memory, critic, strategy, settings)
 
