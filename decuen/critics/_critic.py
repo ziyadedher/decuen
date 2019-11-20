@@ -15,7 +15,7 @@ from decuen.utils.context import get_context
 class CriticSettings:
     """Basic common settings for all critics."""
 
-    discount_factor: float = 0.99
+    discount_factor: float
 
 
 @dataclass
@@ -46,7 +46,7 @@ class Critic(ABC):
     settings: CriticSettings
     _learn_step: int
 
-    def __init__(self, settings: CriticSettings = CriticSettings()) -> None:
+    def __init__(self, settings: CriticSettings) -> None:
         """Initialize this generic critic interface."""
         self.state_space = get_context().state_space
         self.action_space = get_context().action_space
@@ -70,7 +70,7 @@ class StateCritic(Critic):
 
     settings: StateCriticSettings
 
-    def __init__(self, settings: StateCriticSettings = StateCriticSettings()) -> None:
+    def __init__(self, settings: StateCriticSettings) -> None:
         """Initialize this generic state critic interface."""
         super().__init__(settings)
 
@@ -90,7 +90,7 @@ class ActionCritic(Critic):
 
     settings: ActionCriticSettings
 
-    def __init__(self, settings: ActionCriticSettings = ActionCriticSettings()) -> None:
+    def __init__(self, settings: ActionCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 
