@@ -39,7 +39,7 @@ class DQNCritic(QCritic):
     network: Sequential
     _target_network: Sequential
 
-    def __init__(self, model: Sequential, settings: DQNCriticSettings = DQNCriticSettings()) -> None:
+    def __init__(self, model: Sequential, settings: DQNCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 

@@ -25,7 +25,7 @@ from decuen.utils import checks
 class QTableCriticSettings(QCriticSettings):
     """Settings for Q-table critics."""
 
-    learning_rate: float = 0.01
+    learning_rate: float
 
 
 class QTableCritic(QCritic):
@@ -36,7 +36,7 @@ class QTableCritic(QCritic):
     settings: QTableCriticSettings
     table: np.ndarray
 
-    def __init__(self, settings: QTableCriticSettings = QTableCriticSettings()) -> None:
+    def __init__(self, settings: QTableCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 

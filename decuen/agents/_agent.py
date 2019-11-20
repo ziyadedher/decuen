@@ -44,7 +44,7 @@ class Agent(ABC):
     # Current agent trajectory
     _trajectory: List[Transition]
 
-    def __init__(self, memory: Memory, settings: AgentSettings = AgentSettings()) -> None:
+    def __init__(self, memory: Memory, settings: AgentSettings) -> None:
         """Initialize a generic agent."""
         self.state_space = get_context().state_space
         self.action_space = get_context().action_space
@@ -118,7 +118,7 @@ class ActorAgent(Agent):
 
     actor: Actor
 
-    def __init__(self, memory: Memory, actor: Actor, settings: AgentSettings = AgentSettings()) -> None:
+    def __init__(self, memory: Memory, actor: Actor, settings: AgentSettings) -> None:
         """Initialize a generic actor agent."""
         super().__init__(memory, settings)
         self.actor = actor
@@ -161,8 +161,7 @@ class CriticAgent(Agent):
     strategy: Strategy
 
     # TODO: support state critic and action critic
-    def __init__(self, memory: Memory, critic: ActionCritic, strategy: Strategy,
-                 settings: AgentSettings = AgentSettings()) -> None:
+    def __init__(self, memory: Memory, critic: ActionCritic, strategy: Strategy, settings: AgentSettings) -> None:
         """Initialize a generic critic agent."""
         super().__init__(memory, settings)
         self.critic = critic
@@ -208,8 +207,7 @@ class ActorCriticAgent(ActorAgent, CriticAgent):
     actor-critic framework from scratch as would be the case using a regular agent.
     """
 
-    def __init__(self, memory: Memory, actor: Actor, critic: ActionCritic,
-                 settings: AgentSettings = AgentSettings()) -> None:
+    def __init__(self, memory: Memory, actor: Actor, critic: ActionCritic, settings: AgentSettings) -> None:
         """Initialize a generic actor-critic agent."""
         ActorAgent.__init__(self, memory, actor, settings)
         # Note that strategy does nothing in this case since we are never calling the `act` of the `CriticAgent`

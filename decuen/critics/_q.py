@@ -17,14 +17,14 @@ from decuen.memories._memory import Transition
 class QCriticSettings(ActionCriticSettings):
     """Q-value based critic settings."""
 
-    target_update: int = 1
-    double: bool = False
+    target_update: int
+    double: bool
 
 
 class QCritic(ActionCritic):
     """Abstract Q-value based critic to be used for building implementations of Q-value based critics."""
 
-    def __init__(self, settings: QCriticSettings = QCriticSettings()) -> None:
+    def __init__(self, settings: QCriticSettings) -> None:
         """Initialize an abstract Q-value based critic."""
         super().__init__(settings)
 
