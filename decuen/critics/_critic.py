@@ -15,7 +15,7 @@ from decuen.utils.context import get_context
 class CriticSettings:
     """Basic common settings for all critics."""
 
-    discount_factor: float = 0.99
+    discount_factor: float
 
 
 @dataclass

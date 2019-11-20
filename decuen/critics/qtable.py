@@ -25,7 +25,7 @@ from decuen.utils import checks
 class QTableCriticSettings(QCriticSettings):
     """Settings for Q-table critics."""
 
-    learning_rate: float = 0.01
+    learning_rate: float
 
 
 class QTableCritic(QCritic):

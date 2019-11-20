@@ -17,8 +17,8 @@ from decuen.memories._memory import Transition
 class QCriticSettings(ActionCriticSettings):
     """Q-value based critic settings."""
 
-    target_update: int = 1
-    double: bool = False
+    target_update: int
+    double: bool
 
 
 class QCritic(ActionCritic):
