@@ -136,10 +136,7 @@ class ActorAgent(Agent):
 
         Delegates learning to the actor which learns to generate better actions.
         """
-        trajectories = self.memory.replay_trajectories()
-
-        if trajectories:
-            self.actor.learn(trajectories)
+        self.actor.learn(self.memory.replay_trajectories())
 
 
 class CriticAgent(Agent):
@@ -175,19 +172,7 @@ class CriticAgent(Agent):
 
         Delegates learning to the critic which learns more accurate state or action values.
         """
-        transitions = self.memory.replay_transitions()
-
-        for transition in transitions:
-            self._populate_values(transition)
-
-        if transitions:
-            self.critic.learn(transitions)
-
-    def _populate_values(self, transition: Transition) -> None:
-        """Populate the critic fields in a transition based on the current critic."""
-        # TODO: support state critic and action critic
-        # XXX: ACTUALLY DO THIS NEXT
-        transition.state_value = self.critic.crit(transition.state, transition.action)
+        self.critic.learn(self.memory.replay_transitions())
 
 
 class ActorCriticAgent(ActorAgent, CriticAgent):
