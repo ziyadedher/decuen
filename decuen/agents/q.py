@@ -2,8 +2,7 @@
 
 from dataclasses import dataclass
 
-import numpy as np  # type: ignore
-
+from decuen._structs import Action, State
 from decuen.agents._agent import AgentSettings, CriticAgent
 from decuen.critics._q import QCritic
 from decuen.memories._memory import Memory
@@ -25,6 +24,12 @@ class QAgent(CriticAgent):
         """Initialize a Q-value based critic agent."""
         super().__init__(memory, critic, strategy, settings)
 
-    def act(self, state: np.ndarray) -> np.ndarray:
-        """Generate an action to perform based on the Q-values of different actions in a state."""
+    def _act(self, state: State) -> Action:
         return self.strategy.choose(self.critic.values(state))
+
+
+# Finish PyTorch stuff
+# TD learning, implement state and value critic stuff
+# Clean up agent representation
+# Think about how to pass data from critic to actor
+# Maybe make agent generate policy and replace actors with agents

@@ -35,7 +35,7 @@ class Actor(ABC):
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """Choose an action to perform based on an environment state."""
-        return self.policy.act(state).rvs()
+        return self.policy.act(state).sample()
 
     # TODO: support learning from transitions
     # XXX: possibly return loss or some other metric?

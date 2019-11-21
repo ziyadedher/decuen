@@ -1,10 +1,10 @@
 """Implementation of an epsilon-greedy action selection strategy."""
 
+import random
 from abc import ABC, abstractmethod
-from typing import Callable, ClassVar, Collection, Optional
+from typing import Callable, ClassVar, Optional
 
-import numpy as np  # type: ignore
-
+from decuen._structs import Action, Tensor
 from decuen.strategies._strategy import Strategy
 from decuen.strategies.greedy import GreedyStrategy
 from decuen.strategies.rand import RandomStrategy
@@ -101,12 +101,12 @@ class EpsilonGreedyStrategy(Strategy):
         self.min_epsilon = min_epsilon
         self._decay = decay if decay else NoEpsilonDecay()
 
-    def choose(self, action_values: Collection[float]) -> np.ndarray:
+    def choose(self, action_values: Tensor) -> Action:
         """Choose an action to perform greedily with probability epsilon, otherwise randomly.
 
         Decays epsilon according to the decay mechanism after choosing an action.
         """
-        action = (self.greedy.choose(action_values) if np.random.rand() > self.epsilon
+        action = (self.greedy.choose(action_values) if random.random() > self.epsilon
                   else self.random.choose(action_values))
         self.decay()
         return action

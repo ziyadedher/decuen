@@ -14,12 +14,12 @@ import copy
 from dataclasses import dataclass
 from typing import MutableSequence
 
-import numpy as np  # type: ignore
 from gym.spaces import Discrete  # type: ignore
-from torch import tensor, zeros  # pylint: disable=no-name-in-module
+from torch import zeros  # pylint: disable=no-name-in-module
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
+from decuen._structs import Action, State
 from decuen.critics._q import QCritic, QCriticSettings
 from decuen.memories._memory import Transition
 
@@ -64,7 +64,7 @@ class DQNCritic(QCritic):
 
         batch = Transition.batch(transitions)
 
-        values = self.network(batch.states).gather(1, batch.actions)
+        values = self.network(batch.states).gather(1, batch.actions.unsqueeze(1))
         new_states_not_terminal = batch.new_states[~batch.terminals]
 
         next_values = zeros(len(transitions))
@@ -88,10 +88,10 @@ class DQNCritic(QCritic):
         if self._learn_step % self.settings.target_update == 0:
             self._target_network.load_state_dict(self.network.state_dict())
 
-    def crit(self, state: np.ndarray, action: np.ndarray) -> float:
+    def crit(self, state: State, action: Action) -> float:
         """Return the Q-value of taking a specific action in a specific state."""
-        return self.values(state)[action]
+        return float(self.values(state)[action])
 
-    def values(self, state: np.ndarray) -> np.ndarray:
+    def values(self, state: State) -> Action:
         """Return an array of Q-values of all actions in a specific state."""
-        return self.network(tensor([state])).detach()[0]
+        return self.network(state.unsqueeze(0)).detach()[0]

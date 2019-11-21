@@ -1,53 +1,9 @@
 """Interface for arbitrary memory mechanisms for reinforcement learning agents."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import MutableSequence, Optional, Sequence
+from typing import MutableSequence, Optional
 
-import numpy as np  # type: ignore
-from torch import Tensor, tensor  # pylint: disable=no-name-in-module
-
-from decuen.dists._distribution import Distribution
-
-
-@dataclass
-class BatchedTransitions:
-    """Represents a batch of transitions packaged in the format expected by our training procedures."""
-
-    states: Tensor
-    actions: Tensor
-    new_states: Tensor
-    rewards: Tensor
-    terminals: Tensor
-
-
-@dataclass
-class Transition:
-    """Simple data structure representing a transition from one state to another with associated information."""
-
-    state: np.ndarray
-    action: np.ndarray
-    new_state: np.ndarray
-    reward: float
-    terminal: bool
-
-    behavior: Optional[Distribution] = None
-    state_value: Optional[float] = None
-    action_value: Optional[float] = None
-
-    @staticmethod
-    def batch(transitions: MutableSequence['Transition']) -> BatchedTransitions:
-        """Batch a sequence of transitions into the format expected by our training procedures."""
-        states = tensor([np.atleast_1d(transition.state) for transition in transitions])
-        actions = tensor([np.atleast_1d(transition.action) for transition in transitions])
-        new_states = tensor([np.atleast_1d(transition.new_state) for transition in transitions])
-        rewards = tensor([transition.reward for transition in transitions])
-        terminals = tensor([transition.terminal for transition in transitions])
-
-        return BatchedTransitions(states, actions, new_states, rewards, terminals)
-
-
-Trajectory = Sequence[Transition]
+from decuen._structs import Trajectory, Transition
 
 
 class Memory(ABC):

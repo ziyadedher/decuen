@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
-import numpy as np  # type: ignore
 from gym import Space  # type: ignore
 
+from decuen._structs import Action, State
 from decuen.memories._memory import Transition
 from decuen.utils.context import get_context
 
@@ -75,7 +75,7 @@ class StateCritic(Critic):
         super().__init__(settings)
 
     @abstractmethod
-    def crit(self, state: np.ndarray) -> float:
+    def crit(self, state: State) -> float:
         """Return a metric of 'goodness' of a state."""
         ...
 
@@ -95,6 +95,6 @@ class ActionCritic(Critic):
         super().__init__(settings)
 
     @abstractmethod
-    def crit(self, state: np.ndarray, action: np.ndarray) -> float:
+    def crit(self, state: State, action: Action) -> float:
         """Return a metric of 'goodness' of taking an action in a state."""
         ...
