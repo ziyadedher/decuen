@@ -62,27 +62,19 @@ class DQNCritic(QCritic):
         if not transitions:
             return
 
-        states = tensor([np.atleast_1d(transition.state)
-                         for transition in transitions])
-        actions = tensor([np.atleast_1d(transition.action)
-                         for transition in transitions])
-        new_states_not_terminal = tensor([np.atleast_1d(transition.new_state)
-                                          for transition in transitions
-                                          if not transition.terminal])
-        rewards = tensor([transition.reward
-                          for transition in transitions])
-        not_terminal = tensor([not transition.terminal
-                               for transition in transitions])
+        batch = Transition.batch(transitions)
 
-        values = self.network(states).gather(1, actions)
+        values = self.network(batch.states).gather(1, batch.actions)
+        new_states_not_terminal = batch.new_states[~batch.terminals]
+
         next_values = zeros(len(transitions))
         if self.settings.double:
             chosen_actions = self._target_network(new_states_not_terminal).argmax(1, keepdims=True)
-            next_values[not_terminal] = (self.network(new_states_not_terminal)
-                                         .gather(1, chosen_actions).squeeze(1).detach())
+            next_values[~batch.terminals] = (self.network(new_states_not_terminal)
+                                             .gather(1, chosen_actions).squeeze(1).detach())
         else:
-            next_values[not_terminal] = self._target_network(new_states_not_terminal).max(1)[0].detach()
-        target_values = (rewards + (self.settings.discount_factor * next_values)).unsqueeze(1)
+            next_values[~batch.terminals] = self._target_network(new_states_not_terminal).max(1)[0].detach()
+        target_values = (batch.rewards + (self.settings.discount_factor * next_values)).unsqueeze(1)
 
         loss = self.settings.loss(values, target_values)
         self.settings.optimizer.zero_grad()

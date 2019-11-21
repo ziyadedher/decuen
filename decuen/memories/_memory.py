@@ -5,8 +5,20 @@ from dataclasses import dataclass
 from typing import MutableSequence, Optional, Sequence
 
 import numpy as np  # type: ignore
+from torch import Tensor, tensor  # pylint: disable=no-name-in-module
 
 from decuen.dists._distribution import Distribution
+
+
+@dataclass
+class BatchedTransitions:
+    """Represents a batch of transitions packaged in the format expected by our training procedures."""
+
+    states: Tensor
+    actions: Tensor
+    new_states: Tensor
+    rewards: Tensor
+    terminals: Tensor
 
 
 @dataclass
@@ -22,6 +34,17 @@ class Transition:
     behavior: Optional[Distribution] = None
     state_value: Optional[float] = None
     action_value: Optional[float] = None
+
+    @staticmethod
+    def batch(transitions: MutableSequence['Transition']) -> BatchedTransitions:
+        """Batch a sequence of transitions into the format expected by our training procedures."""
+        states = tensor([np.atleast_1d(transition.state) for transition in transitions])
+        actions = tensor([np.atleast_1d(transition.action) for transition in transitions])
+        new_states = tensor([np.atleast_1d(transition.new_state) for transition in transitions])
+        rewards = tensor([transition.reward for transition in transitions])
+        terminals = tensor([transition.terminal for transition in transitions])
+
+        return BatchedTransitions(states, actions, new_states, rewards, terminals)
 
 
 Trajectory = Sequence[Transition]
