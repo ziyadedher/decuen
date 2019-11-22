@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import numpy as np  # type: ignore
 from gym.spaces import Discrete, Space  # type: ignore
@@ -190,7 +190,7 @@ class ActorCriticAgent(ActorAgent, CriticAgent):
         self.actor = actor
         self.critic = critic
 
-    def _act(self, state: Space) -> Action:
+    def _act(self, state: State) -> Action:
         return ActorAgent.act(self, state)
 
     def learn(self) -> None:
