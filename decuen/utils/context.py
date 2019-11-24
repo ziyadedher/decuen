@@ -142,3 +142,16 @@ def with_context(func: FuncType) -> FuncType:
             kwargs[action_space_kwarg_name] = CTX.get_context().action_space
         func(*args, **kwargs)
     return cast(FuncType, context_wrapper)
+
+
+# pylint: disable=too-few-public-methods
+class Contextful:
+    """Thin interface class to introduce contextful state and action spaces to any class."""
+
+    state_space: Space
+    action_space: Space
+
+    def __init__(self) -> None:
+        """Initialize a contextful object and populate the state an action spaces based on context."""
+        self.state_space = get_context().state_space
+        self.action_space = get_context().action_space
