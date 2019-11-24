@@ -1,12 +1,12 @@
 """Implementation of an epsilon-greedy action selection strategy."""
 
-import random
 from abc import ABC, abstractmethod
 from typing import Callable, ClassVar, Optional
 
-from decuen.strategies._strategy import Strategy
-from decuen.strategies.greedy import GreedyStrategy
-from decuen.strategies.rand import RandomStrategy
+from decuen.actors.strats._strategy import Strategy
+from decuen.actors.strats.greedy import GreedyStrategy
+from decuen.actors.strats.uniform import UniformStrategy
+from decuen.dists import Categorical
 from decuen.structs import Action, Tensor
 from decuen.utils.function_property import FunctionProperty
 
@@ -86,7 +86,7 @@ class EpsilonGreedyStrategy(Strategy):
     """Epsilon-greedy action selection strategy."""
 
     greedy: ClassVar[GreedyStrategy] = GreedyStrategy()
-    random: ClassVar[RandomStrategy] = RandomStrategy()
+    random: ClassVar[UniformStrategy] = UniformStrategy()
     epsilon: float
     min_epsilon: float
     max_epsilon: float
@@ -94,22 +94,21 @@ class EpsilonGreedyStrategy(Strategy):
 
     def __init__(self, epsilon: float, max_epsilon: float = 1, min_epsilon: float = 0,
                  decay: Optional[EpsilonDecay] = None) -> None:
-        """Initialize an epsilon greedy strategy."""
-        super().__init__()
+        """Initialize an epsilon-greedy strategy."""
+        super().__init__(Categorical)
         self.epsilon = epsilon
         self.max_epsilon = max_epsilon
         self.min_epsilon = min_epsilon
         self._decay = decay if decay else NoEpsilonDecay()
 
-    def choose(self, action_values: Tensor) -> Action:
-        """Choose an action to perform greedily with probability epsilon, otherwise randomly.
+    def act(self, action_values: Tensor) -> Action:
+        """Generate parameters for a categorical action distribution based on a epsilon-greedy strategy.
 
         Decays epsilon according to the decay mechanism after choosing an action.
         """
-        action = (self.greedy.choose(action_values) if random.random() > self.epsilon
-                  else self.random.choose(action_values))
+        probs = (1 - self.epsilon) * self.greedy.act(action_values) + self.epsilon * self.random.act(action_values)
         self.decay()
-        return action
+        return probs
 
     def decay(self) -> None:
         """Decay the epsilon according to the decaying technique."""

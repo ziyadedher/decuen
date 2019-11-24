@@ -2,21 +2,23 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import MutableSequence, Optional
+from typing import MutableSequence, Optional, Type
 
-import numpy as np  # type: ignore
-
+from decuen.critics import ActionCritic
 from decuen.dists import Distribution
-from decuen.policies import Policy
-from decuen.structs import Action, State, Trajectory
+from decuen.policy import Policy
+from decuen.structs import State, Tensor, Trajectory
+from decuen.utils.context import Contextful
 
 
 @dataclass
 class ActorSettings:
     """Basic common settings for all actor-learners."""
 
+    dist: Type[Distribution]
 
-class Actor(ABC):
+
+class Actor(ABC, Contextful):
     """Generic abstract actor-learner interface.
 
     This abstraction provides interfaces for the two main functionalities of an actor-learner:
@@ -24,18 +26,21 @@ class Actor(ABC):
         2. the ability to learn based on past transitions and trajectories.
     """
 
+    settings: ActorSettings
     policy: Policy
+    critic: Optional[ActionCritic]
 
     @abstractmethod
-    def __init__(self, distribution: Optional[Distribution] = None,
-                 settings: ActorSettings = ActorSettings()) -> None:
+    def __init__(self, settings: ActorSettings) -> None:
         """Initialize a generic actor-learner."""
-        self.policy = Policy(self._generate_policy_parameters,
-                             distribution if distribution else self._choose_action_distribution())
+        super().__init__()
+        self.settings = settings
+        self.policy = Policy(self._generate_policy_parameters, self.settings.dist)
+        self.critic = None
 
-    def act(self, state: State) -> Action:
-        """Choose an action to perform based on an environment state."""
-        return self.policy.act(state).sample()
+    def act(self, state: State) -> Distribution:
+        """Construct a parameterized policy and return the generated distribution."""
+        return self.policy.act(state)
 
     # TODO: support learning from transitions
     # XXX: possibly return loss or some other metric?
@@ -45,10 +50,6 @@ class Actor(ABC):
         ...
 
     @abstractmethod
-    def _generate_policy_parameters(self, state: State) -> np.ndarray:
+    def _generate_policy_parameters(self, state: State) -> Tensor:
         """Generate policy parameters on-the-fly based on an environment state."""
         ...
-
-    def _choose_action_distribution(self) -> np.ndarray:
-        """Choose an action distribution for the policy depending on the action space."""
-        # TODO: implement
