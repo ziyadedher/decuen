@@ -42,7 +42,7 @@ pyflakes:
 pylint:
   run: true
   options:
-    ignored-modules: tensorflow.keras
+    ignored-modules: torch
 
 pyroma:
   run: false
