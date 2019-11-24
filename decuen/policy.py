@@ -2,10 +2,8 @@
 
 from typing import Callable, Type
 
-import numpy as np  # type: ignore
-
 from decuen.dists import Distribution
-from decuen.structs import State
+from decuen.structs import State, Tensor
 from decuen.utils.function_property import FunctionProperty
 
 
@@ -18,11 +16,10 @@ class Policy:
     This simulates the deterministic policy in our stochastic policy setting.
     """
 
-    _parameters_factory: FunctionProperty[Callable[[State], np.ndarray]]
+    _parameters_factory: FunctionProperty[Callable[[State], Tensor]]
     _distribution_factory: Type[Distribution]
 
-    def __init__(self, parameters_factory: Callable[[State], np.ndarray],
-                 distribution_factory: Type[Distribution]) -> None:
+    def __init__(self, parameters_factory: Callable[[State], Tensor], distribution_factory: Type[Distribution]) -> None:
         """Initialize a generic policy."""
         self._parameters_factory = parameters_factory
         self._distribution_factory = distribution_factory
