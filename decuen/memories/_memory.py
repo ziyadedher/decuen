@@ -42,9 +42,7 @@ class Memory(ABC):
 
     def replay_transitions(self, num: Optional[int] = None) -> MutableSequence[Transition]:
         """Replay experiences from our memory buffer based on some mechanism."""
-        if num is None:
-            return self._replay_transitions(self.transition_replay_num)
-        return self._replay_transitions(num)
+        return self._replay_transitions(min(len(self._transition_buffer), num or self.transition_replay_num))
 
     @abstractmethod
     def _replay_transitions(self, num: int) -> MutableSequence[Transition]:
@@ -57,9 +55,7 @@ class Memory(ABC):
 
     def replay_trajectories(self, num: Optional[int] = None) -> MutableSequence[Trajectory]:
         """Replay trajectories from our memory buffer based on some mechanism."""
-        if num is None:
-            return self._replay_trajectories(self.trajectory_replay_num)
-        return self._replay_trajectories(num)
+        return self._replay_trajectories(min(len(self._trajectory_buffer), num or self.trajectory_replay_num))
 
     @abstractmethod
     def _replay_trajectories(self, num: int) -> MutableSequence[Trajectory]:
