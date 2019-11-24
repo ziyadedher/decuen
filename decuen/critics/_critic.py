@@ -41,6 +41,7 @@ class Critic(ABC, Contextful):
     settings: CriticSettings
     _learn_step: int
 
+    @abstractmethod
     def __init__(self, settings: CriticSettings) -> None:
         """Initialize this generic critic interface."""
         super().__init__()

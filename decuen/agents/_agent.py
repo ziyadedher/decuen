@@ -1,6 +1,5 @@
 """Interfaces for arbitrary reinforcement learning agents."""
 
-from abc import ABC
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -18,7 +17,7 @@ class AgentSettings:
     """Basic common hyperparameter settings for all agents."""
 
 
-class Agent(ABC, Contextful):
+class Agent(Contextful):
     """High-level reinforcement learning agent abstraction.
 
     This abstraction implements essentially no logic instead delegating all processing to the respective subclasses
