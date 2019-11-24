@@ -1,9 +1,14 @@
+"""Collection of common structures subject to expansion or modification.
+
+These structures should only be used internally within the framework and their APIs should never be considered stable.
+"""
+
 from dataclasses import dataclass
 from typing import MutableSequence, Optional, Sequence
 
 import torch
 
-from decuen.dists._distribution import Distribution
+from decuen.dists import Distribution
 
 State = torch.Tensor
 Action = torch.Tensor
@@ -12,6 +17,9 @@ Tensor = torch.Tensor
 
 def tensor(*args, **kwargs) -> torch.Tensor:
     return torch.tensor(*args, **kwargs)  # noqa
+
+
+tensor.__doc__ = torch.tensor.__doc__
 
 
 @dataclass
