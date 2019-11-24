@@ -6,6 +6,7 @@ Based on REINFORCE algorithm with causality and baselines.
 from dataclasses import dataclass
 from typing import MutableSequence
 
+from torch import from_numpy
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
@@ -34,7 +35,8 @@ class PGActor(Actor):
         """Initialize a policy-gradient actor-learner."""
         super().__init__(settings)
 
-        final_layer, self.network = finalize_module(model, self.state_space.sample(), self._num_policy_params)
+        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample()),
+                                                    self._num_policy_params)
         self.settings.optimizer.add_param_group({"params": final_layer.parameters()})
 
     def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
