@@ -5,7 +5,8 @@ Simulates the capacity for on-policy training.
 
 from typing import List
 
-from decuen.memories._memory import Memory, Trajectory, Transition
+from decuen.memories._memory import Memory
+from decuen.structs import Trajectory, Transition
 
 
 class ShortTermMemory(Memory):

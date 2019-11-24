@@ -7,10 +7,8 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
-import numpy as np  # type: ignore
-
 from decuen.critics._critic import ActionCritic, ActionCriticSettings
-from decuen.memories._memory import Transition
+from decuen.structs import Action, State, Transition
 
 
 @dataclass
@@ -34,11 +32,11 @@ class QCritic(ActionCritic):
         ...
 
     @abstractmethod
-    def crit(self, state: np.ndarray, action: np.ndarray) -> float:
+    def crit(self, state: State, action: Action) -> float:
         """Return a metric of 'goodness' of taking an action in a state."""
         ...
 
     @abstractmethod
-    def values(self, state: np.ndarray) -> np.ndarray:
+    def values(self, state: State) -> Action:
         """Return an array of Q-values of all actions in a specific state."""
         ...

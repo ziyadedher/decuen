@@ -4,8 +4,9 @@ from typing import Callable, Type
 
 import numpy as np  # type: ignore
 
-from decuen.dists._distribution import Distribution
-from decuen.utils.function_property import _FunctionProperty
+from decuen.dists import Distribution
+from decuen.structs import State
+from decuen.utils.function_property import FunctionProperty
 
 
 class Policy:
@@ -17,22 +18,22 @@ class Policy:
     This simulates the deterministic policy in our stochastic policy setting.
     """
 
-    _parameters_factory: _FunctionProperty[Callable[[np.ndarray], np.ndarray]]
+    _parameters_factory: FunctionProperty[Callable[[State], np.ndarray]]
     _distribution_factory: Type[Distribution]
 
-    def __init__(self, parameters_factory: Callable[[np.ndarray], np.ndarray],
+    def __init__(self, parameters_factory: Callable[[State], np.ndarray],
                  distribution_factory: Type[Distribution]) -> None:
         """Initialize a generic policy."""
         self._parameters_factory = parameters_factory
         self._distribution_factory = distribution_factory
 
-    def __call__(self, state: np.ndarray) -> np.ndarray:
+    def __call__(self, state: State) -> Distribution:
         """Alias calling an instance of this policy as just calling `act`.
 
         This induces the effect of the policy seeming like a function as it appears in the literature.
         """
         return self.act(state)
 
-    def act(self, state: np.ndarray) -> np.ndarray:
-        """Generate a distribution over action to perform given a state."""
+    def act(self, state: State) -> Distribution:
+        """Generate a distribution over actions to perform given a state."""
         return self._distribution_factory(self._parameters_factory(state))

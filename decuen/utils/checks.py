@@ -3,7 +3,7 @@
 import numpy as np  # type: ignore
 from gym.spaces import Space  # type: ignore
 
-from decuen.memories._memory import Transition
+from decuen.structs import Transition
 
 
 class DecuenError(Exception):

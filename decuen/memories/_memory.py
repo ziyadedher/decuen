@@ -1,30 +1,9 @@
 """Interface for arbitrary memory mechanisms for reinforcement learning agents."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import MutableSequence, Optional, Sequence
+from typing import MutableSequence, Optional
 
-import numpy as np  # type: ignore
-
-from decuen.dists._distribution import Distribution
-
-
-@dataclass
-class Transition:
-    """Simple data structure representing a transition from one state to another with associated information."""
-
-    state: np.ndarray
-    action: np.ndarray
-    new_state: np.ndarray
-    reward: float
-    terminal: bool
-
-    behavior: Optional[Distribution] = None
-    state_value: Optional[float] = None
-    action_value: Optional[float] = None
-
-
-Trajectory = Sequence[Transition]
+from decuen.structs import Trajectory, Transition
 
 
 class Memory(ABC):

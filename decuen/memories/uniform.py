@@ -3,7 +3,8 @@
 import random
 from typing import List, Optional
 
-from decuen.memories._memory import Memory, Trajectory, Transition
+from decuen.memories._memory import Memory
+from decuen.structs import Trajectory, Transition
 
 
 class UniformMemory(Memory):

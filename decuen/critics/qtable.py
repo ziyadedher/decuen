@@ -17,7 +17,7 @@ import numpy as np  # type: ignore
 from gym.spaces import Discrete  # type: ignore
 
 from decuen.critics._q import QCritic, QCriticSettings
-from decuen.memories._memory import Transition
+from decuen.structs import Transition
 from decuen.utils import checks
 
 
