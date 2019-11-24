@@ -64,3 +64,13 @@ class Memory(ABC):
     @abstractmethod
     def _replay_trajectories(self, num: int) -> MutableSequence[Trajectory]:
         ...
+
+    def clear(self) -> None:
+        """Clear this memory and reset it to its state at initialization.
+
+        Stored transitions and trajectories are forgotten and memory is reinitialized.
+        """
+        self.transition = None
+        self.trajectory = None
+        self._transition_buffer.clear()
+        self._trajectory_buffer.clear()
