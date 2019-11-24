@@ -23,7 +23,7 @@ class StrategyActor(Actor):
     def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
         """Do nothing. Learning is not supported for strategy-based actors."""
 
-    def _generate_policy_parameters(self, state: State) -> Tensor:
+    def _gen_policy_params(self, state: State) -> Tensor:
         """Generate policy parameters on-the-fly based on an environment state."""
         if not self.critic:
             raise ValueError("strategy actor must be assigned a critic")
