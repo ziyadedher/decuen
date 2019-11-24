@@ -31,6 +31,10 @@ def arange(*args, **kwargs) -> torch.Tensor:  # noqa
     return torch.arange(*args, **kwargs)  # noqa
 
 
+def eye(*args, **kwargs) -> torch.Tensor:  # noqa
+    return torch.eye(*args, **kwargs)  # noqa
+
+
 tensor.__doc__ = torch.tensor.__doc__
 
 
