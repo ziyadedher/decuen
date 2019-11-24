@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from typing import MutableSequence
 
 from gym.spaces import Discrete  # type: ignore
-from torch import zeros  # pylint: disable=no-name-in-module
-from torch.nn import Module
+from torch import from_numpy, zeros  # pylint: disable=no-name-in-module
+from torch.nn import Linear, Module, Sequential
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._q import QCritic, QCriticSettings
@@ -47,13 +47,24 @@ class DQNCritic(QCritic):
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 
-        # TODO: possibly generalize to multi-discrete spaces
+        # TODO: possibly generalize to multi-discrete spaces, maybe continuous as well with a separate formulation
         if not isinstance(self.action_space, Discrete):
-            raise TypeError("action space for Q-table critic must be discrete")
+            raise TypeError("action space for Q-network critic must be discrete")
 
-        self.network = model
-        self._target_network = copy.deepcopy(model)
+        # TODO: generalize this to other classes
+        try:
+            size = model(from_numpy(self.state_space.sample())).size()
+        except RuntimeError:
+            raise ValueError("given model is incompatible with the state space")
+        if len(size) != 1:
+            raise ValueError(f"given model must have one-dimensional output, instead got output shape {size}")
+
+        final_layer = Linear(size[0], self.action_space.n)
+        self.network = Sequential(model, final_layer)
+        self._target_network = copy.deepcopy(self.network)
         self._target_network.eval()
+
+        self.settings.optimizer.add_param_group({"params": final_layer.parameters()})
 
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Update internal critic representation based on past transitions."""
