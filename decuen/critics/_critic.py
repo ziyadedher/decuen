@@ -4,10 +4,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
-from gym import Space  # type: ignore
-
 from decuen.structs import Action, State, Tensor, Transition
-from decuen.utils.context import get_context
+from decuen.utils.context import Contextful
 
 
 @dataclass
@@ -28,7 +26,7 @@ class ActionCriticSettings(CriticSettings):
 
 
 # pylint: disable=too-few-public-methods
-class Critic(ABC):
+class Critic(ABC, Contextful):
     """Generic abstract critic interface.
 
     Note that this abstraction is more general that what might normally be viewed as a critic in modern literature: we
@@ -40,15 +38,12 @@ class Critic(ABC):
     based critics: the ability to learn based on past transitions and trajectories to improve critical accuracy.
     """
 
-    state_space: Space
-    action_space: Space
     settings: CriticSettings
     _learn_step: int
 
     def __init__(self, settings: CriticSettings) -> None:
         """Initialize this generic critic interface."""
-        self.state_space = get_context().state_space
-        self.action_space = get_context().action_space
+        super().__init__()
         self.settings = settings
         self._learn_step = 0
 
