@@ -6,7 +6,7 @@ from typing import MutableSequence
 
 from gym import Space  # type: ignore
 
-from decuen.structs import Action, State, Transition
+from decuen.structs import Action, State, Tensor, Transition
 from decuen.utils.context import get_context
 
 
@@ -74,8 +74,8 @@ class StateCritic(Critic):
         super().__init__(settings)
 
     @abstractmethod
-    def crit(self, state: State) -> float:
-        """Return a metric of 'goodness' of a state."""
+    def crit(self, state: State) -> Tensor:
+        """Return a metric of 'goodness' of a state or tensor of states."""
         ...
 
 
@@ -94,6 +94,6 @@ class ActionCritic(Critic):
         super().__init__(settings)
 
     @abstractmethod
-    def crit(self, state: State, action: Action) -> float:
-        """Return a metric of 'goodness' of taking an action in a state."""
+    def crit(self, state: State, action: Action) -> Tensor:
+        """Return a metric of 'goodness' of taking an action or tensor of actions in a state."""
         ...

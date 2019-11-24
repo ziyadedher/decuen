@@ -20,7 +20,7 @@ from torch.nn import Linear, Module, Sequential
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._q import QCritic, QCriticSettings
-from decuen.structs import Action, State, Transition
+from decuen.structs import Action, State, Tensor, Transition
 
 
 @dataclass
@@ -98,10 +98,6 @@ class DQNCritic(QCritic):
         if self._learn_step % self.settings.target_update == 0:
             self._target_network.load_state_dict(self.network.state_dict())
 
-    def crit(self, state: State, action: Action) -> float:
-        """Return the Q-value of taking a specific action in a specific state."""
-        return float(self.values(state)[action])
-
-    def values(self, state: State) -> Action:
-        """Return an array of Q-values of all actions in a specific state."""
-        return self.network(state.unsqueeze(0)).detach()[0]
+    def crit(self, state: State, action: Action) -> Tensor:
+        """Return the quality of taking an action or tensor of actions in a state."""
+        return self.network(state).detach()[action]

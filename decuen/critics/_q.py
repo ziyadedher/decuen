@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import MutableSequence
 
 from decuen.critics._critic import ActionCritic, ActionCriticSettings
-from decuen.structs import Action, State, Transition
+from decuen.structs import Action, State, Tensor, Transition
 
 
 @dataclass
@@ -32,11 +32,6 @@ class QCritic(ActionCritic):
         ...
 
     @abstractmethod
-    def crit(self, state: State, action: Action) -> float:
-        """Return a metric of 'goodness' of taking an action in a state."""
-        ...
-
-    @abstractmethod
-    def values(self, state: State) -> Action:
-        """Return an array of Q-values of all actions in a specific state."""
+    def crit(self, state: State, action: Action) -> Tensor:
+        """Return the quality of taking an action or tensor of actions in a state."""
         ...
