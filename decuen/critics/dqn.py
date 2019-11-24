@@ -19,20 +19,22 @@ from torch import from_numpy, zeros  # pylint: disable=no-name-in-module
 from torch.nn import Linear, Module, Sequential
 from torch.optim import Optimizer  # type: ignore
 
-from decuen.critics._q import QCritic, QCriticSettings
+from decuen.critics._critic import ActionCritic, ActionCriticSettings
 from decuen.structs import Action, State, Tensor, Transition
 
 
 @dataclass
-class DQNCriticSettings(QCriticSettings):
+class DQNCriticSettings(ActionCriticSettings):
     """Settings for Q-table critics."""
 
+    target_update: int
+    double: bool
     clipped: bool
     optimizer: Optimizer
     loss: Module
 
 
-class DQNCritic(QCritic):
+class DQNCritic(ActionCritic):
     """Deep Q-network critic.
 
     See [1], [2], [3] for more details.
