@@ -3,10 +3,11 @@
 from typing import MutableSequence
 
 from gym.spaces import Discrete  # type: ignore
+from torch import arange
 
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.actors.strats import Strategy
-from decuen.structs import State, Tensor, Trajectory, arange
+from decuen.structs import State, Tensor, Trajectory
 
 
 class StrategyActor(Actor):

@@ -1,8 +1,10 @@
 """Implementation of a greedy action selection strategy."""
 
+from torch import zeros
+
 from decuen.actors.strats._strategy import Strategy
 from decuen.dists import Categorical
-from decuen.structs import Tensor, zeros
+from decuen.structs import Tensor
 
 
 # pylint: disable=too-few-public-methods

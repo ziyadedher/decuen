@@ -19,22 +19,6 @@ def tensor(*args, **kwargs) -> torch.Tensor:  # noqa
     return torch.tensor(*args, **kwargs)  # noqa
 
 
-def zeros(*args, **kwargs) -> torch.Tensor:  # noqa
-    return torch.zeros(*args, **kwargs)  # noqa
-
-
-def ones(*args, **kwargs) -> torch.Tensor:  # noqa
-    return torch.ones(*args, **kwargs)  # noqa
-
-
-def arange(*args, **kwargs) -> torch.Tensor:  # noqa
-    return torch.arange(*args, **kwargs)  # noqa
-
-
-def eye(*args, **kwargs) -> torch.Tensor:  # noqa
-    return torch.eye(*args, **kwargs)  # noqa
-
-
 tensor.__doc__ = torch.tensor.__doc__
 
 

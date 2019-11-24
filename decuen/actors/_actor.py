@@ -6,10 +6,11 @@ from functools import reduce
 from typing import MutableSequence, Optional, Type
 
 from gym.spaces import Box, Discrete  # type: ignore
+from torch import diag
 
 from decuen.critics import ActionCritic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
-from decuen.structs import State, Tensor, Trajectory, eye
+from decuen.structs import State, Tensor, Trajectory
 from decuen.utils.context import Contextful
 
 
@@ -93,6 +94,6 @@ class Actor(ABC, Contextful):
 
         if self.settings.dist is MultivariateNormal:
             half = params.size()[0] / 2
-            return MultivariateNormal(params[:half], eye(params[:half]))
+            return MultivariateNormal(params[:half], diag(params[:half]))
 
         raise NotImplementedError("actors do not support this action distribution yet")
