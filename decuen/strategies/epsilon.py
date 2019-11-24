@@ -4,11 +4,11 @@ import random
 from abc import ABC, abstractmethod
 from typing import Callable, ClassVar, Optional
 
-from decuen._structs import Action, Tensor
 from decuen.strategies._strategy import Strategy
 from decuen.strategies.greedy import GreedyStrategy
 from decuen.strategies.rand import RandomStrategy
-from decuen.utils.function_property import _FunctionProperty
+from decuen.structs import Action, Tensor
+from decuen.utils.function_property import FunctionProperty
 
 
 # pylint: disable=too-few-public-methods
@@ -35,7 +35,7 @@ class FunctionEpsilonDecay(EpsilonDecay):
     Decays based on a custom decay function.
     """
 
-    func: _FunctionProperty[Callable[[float], float]]
+    func: FunctionProperty[Callable[[float], float]]
 
     def __init__(self, func: Callable[[float], float]) -> None:
         """Initialize a functional epsilon decay technique."""

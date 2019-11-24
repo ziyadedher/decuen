@@ -19,9 +19,8 @@ from torch import zeros  # pylint: disable=no-name-in-module
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
-from decuen._structs import Action, State
 from decuen.critics._q import QCritic, QCriticSettings
-from decuen.memories._memory import Transition
+from decuen.structs import Action, State, Transition
 
 
 @dataclass

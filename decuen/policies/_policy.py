@@ -4,9 +4,9 @@ from typing import Callable, Type
 
 import numpy as np  # type: ignore
 
-from decuen._structs import State
-from decuen.dists._distribution import Distribution
-from decuen.utils.function_property import _FunctionProperty
+from decuen.dists import Distribution
+from decuen.structs import State
+from decuen.utils.function_property import FunctionProperty
 
 
 class Policy:
@@ -18,7 +18,7 @@ class Policy:
     This simulates the deterministic policy in our stochastic policy setting.
     """
 
-    _parameters_factory: _FunctionProperty[Callable[[State], np.ndarray]]
+    _parameters_factory: FunctionProperty[Callable[[State], np.ndarray]]
     _distribution_factory: Type[Distribution]
 
     def __init__(self, parameters_factory: Callable[[State], np.ndarray],

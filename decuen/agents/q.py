@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass
 
-from decuen._structs import Action, State
 from decuen.agents._agent import AgentSettings, CriticAgent
-from decuen.critics._q import QCritic
-from decuen.memories._memory import Memory
-from decuen.strategies._strategy import Strategy
+from decuen.critics import QCritic
+from decuen.memories import Memory
+from decuen.strategies import Strategy
+from decuen.structs import Action, State
 
 
 @dataclass

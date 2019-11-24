@@ -2,8 +2,8 @@
 
 import random
 
-from decuen._structs import Action, Tensor, tensor
 from decuen.strategies._strategy import Strategy
+from decuen.structs import Action, Tensor, tensor
 
 
 # pylint: disable=too-few-public-methods

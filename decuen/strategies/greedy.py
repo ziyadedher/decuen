@@ -1,7 +1,7 @@
 """Implementation of a greedy action selection strategy."""
 
-from decuen._structs import Action, Tensor
 from decuen.strategies._strategy import Strategy
+from decuen.structs import Action, Tensor
 
 
 # pylint: disable=too-few-public-methods

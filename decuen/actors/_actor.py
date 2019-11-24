@@ -6,9 +6,9 @@ from typing import MutableSequence, Optional
 
 import numpy as np  # type: ignore
 
-from decuen.dists._distribution import Distribution
-from decuen.memories._memory import Trajectory
-from decuen.policies._policy import Policy
+from decuen.dists import Distribution
+from decuen.policies import Policy
+from decuen.structs import Action, State, Trajectory
 
 
 @dataclass
@@ -33,7 +33,7 @@ class Actor(ABC):
         self.policy = Policy(self._generate_policy_parameters,
                              distribution if distribution else self._choose_action_distribution())
 
-    def act(self, state: np.ndarray) -> np.ndarray:
+    def act(self, state: State) -> Action:
         """Choose an action to perform based on an environment state."""
         return self.policy.act(state).sample()
 
@@ -45,7 +45,7 @@ class Actor(ABC):
         ...
 
     @abstractmethod
-    def _generate_policy_parameters(self, state: np.ndarray) -> np.ndarray:
+    def _generate_policy_parameters(self, state: State) -> np.ndarray:
         """Generate policy parameters on-the-fly based on an environment state."""
         ...
 

@@ -7,9 +7,8 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import MutableSequence
 
-from decuen._structs import Action, State
 from decuen.critics._critic import ActionCritic, ActionCriticSettings
-from decuen.memories._memory import Transition
+from decuen.structs import Action, State, Transition
 
 
 @dataclass

@@ -6,8 +6,7 @@ from typing import MutableSequence
 
 from gym import Space  # type: ignore
 
-from decuen._structs import Action, State
-from decuen.memories._memory import Transition
+from decuen.structs import Action, State, Transition
 from decuen.utils.context import get_context
 
 

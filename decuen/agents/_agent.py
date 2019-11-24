@@ -7,12 +7,11 @@ from typing import List, Optional
 import numpy as np  # type: ignore
 from gym.spaces import Discrete, Space  # type: ignore
 
-from decuen._structs import Action, State, tensor
-from decuen.actors._actor import Actor
-from decuen.critics._critic import ActionCritic
-from decuen.memories._memory import Memory, Transition
-from decuen.strategies._strategy import Strategy
-from decuen.strategies.rand import RandomStrategy
+from decuen.actors import Actor
+from decuen.critics import ActionCritic
+from decuen.memories import Memory
+from decuen.strategies import RandomStrategy, Strategy
+from decuen.structs import Action, State, Transition, tensor
 from decuen.utils.context import get_context
 
 

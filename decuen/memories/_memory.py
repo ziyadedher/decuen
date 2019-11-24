@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import MutableSequence, Optional
 
-from decuen._structs import Trajectory, Transition
+from decuen.structs import Trajectory, Transition
 
 
 class Memory(ABC):
