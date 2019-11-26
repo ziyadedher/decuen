@@ -18,7 +18,7 @@ class StrategyActor(Actor):
 
     def __init__(self, strategy: Strategy) -> None:
         """Initialize a strategy actor."""
-        super().__init__(ActorSettings(dist=strategy.distribution_type))
+        super().__init__(ActorSettings(dist=strategy.distribution_type, discount_factor=1))
         self.strategy = strategy
 
     def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
