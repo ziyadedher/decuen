@@ -4,14 +4,14 @@ Based on REINFORCE algorithm with causality and baselines.
 """
 
 from dataclasses import dataclass
-from typing import MutableSequence
+from typing import ClassVar, MutableSequence
 
-from torch import from_numpy
-from torch.nn import Module
+from torch import arange, from_numpy
+from torch.nn import Module, NLLLoss
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.actors._actor import Actor, ActorSettings
-from decuen.structs import State, Tensor, Trajectory
+from decuen.structs import State, Tensor, Trajectory, batch_transitions, tensor
 from decuen.utils.module_construction import finalize_module
 
 
@@ -20,7 +20,6 @@ class PGActorSettings(ActorSettings):
     """Basic common settings for all actor-learners."""
 
     optimizer: Optimizer
-    loss: Module
 
 
 class PGActor(Actor):
@@ -30,6 +29,7 @@ class PGActor(Actor):
     """
 
     settings: PGActorSettings
+    loss: ClassVar[Module] = NLLLoss()
 
     def __init__(self, model: Module, settings: PGActorSettings) -> None:
         """Initialize a policy-gradient actor-learner."""
@@ -41,7 +41,21 @@ class PGActor(Actor):
 
     def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
         """Update policy based on past trajectories."""
-        raise NotImplementedError("not yet implemented")
+        trajectory = trajectories[0]
+
+        batch = batch_transitions(trajectory)
+        policies = self.act(batch.states)
+        neglog = -policies.log_prob(batch.actions.squeeze(1))
+
+        discounted_rewards = tensor([self.settings.discount_factor]).pow(arange(batch.rewards.size()[0]))
+        advantage_estim = discounted_rewards.flip(0).cumsum(0).flip(0)  # Reverse cumulative sum (causality)
+
+        loss = neglog * advantage_estim
+        loss = loss.sum()
+
+        self.settings.optimizer.zero_grad()
+        loss.backward()
+        self.settings.optimizer.step()
 
     def _gen_policy_params(self, state: State) -> Tensor:
         """Generate policy parameters on-the-fly based on an environment state."""
