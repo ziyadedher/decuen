@@ -6,7 +6,7 @@ from typing import List, Optional
 import numpy as np  # type: ignore
 
 from decuen.actors import Actor
-from decuen.critics import ActionCritic
+from decuen.critics import Critic
 from decuen.memories import Memory
 from decuen.structs import Action, State, Transition, tensor
 from decuen.utils.context import Contextful
@@ -31,7 +31,7 @@ class Agent(Contextful):
     memory: Memory
     settings: AgentSettings
     actor: Actor
-    critic: ActionCritic
+    critic: Critic
 
     # Current state of the agent
     _state: Optional[State]
@@ -40,7 +40,7 @@ class Agent(Contextful):
     # Current agent trajectory
     _trajectory: List[Transition]
 
-    def __init__(self, memory: Memory, actor: Actor, critic: ActionCritic, settings: AgentSettings) -> None:
+    def __init__(self, memory: Memory, actor: Actor, critic: Critic, settings: AgentSettings) -> None:
         """Initialize a generic agent."""
         super().__init__()
         self.memory = memory
