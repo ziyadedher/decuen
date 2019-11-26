@@ -2,9 +2,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import MutableSequence
+from typing import MutableSequence, Union
 
-from decuen.structs import Action, State, Tensor, Transition
+from decuen.structs import Action, State, Tensor, Trajectory, Transition
 from decuen.utils.context import Contextful
 
 
@@ -15,18 +15,8 @@ class CriticSettings:
     discount_factor: float
 
 
-@dataclass
-class StateCriticSettings(CriticSettings):
-    """Basic common settings for all state critics."""
-
-
-@dataclass
-class ActionCriticSettings(CriticSettings):
-    """Basic common settings for all action critics."""
-
-
 # pylint: disable=too-few-public-methods
-class Critic(ABC, Contextful):
+class _Critic(ABC, Contextful):
     """Generic abstract critic interface.
 
     Note that this abstraction is more general that what might normally be viewed as a critic in modern literature: we
@@ -56,18 +46,25 @@ class Critic(ABC, Contextful):
         ...
 
 
-class StateCritic(Critic):
+class AdvantageCritic(_Critic):
+    """Generic abstract advantage critic interface.
+
+    This abstraction slightly specializes the very general `_Critic` interface to output an advantage and as such
+    provides an interface for generating the advantage of transitions.
+    """
+
+    @abstractmethod
+    def advantage(self, trajectory: Union[Transition, Trajectory]) -> Tensor:
+        """Estimate the advantage of every transition in a trajectory."""
+        ...
+
+
+class StateValueCritic(_Critic):
     """Generic abstract state-value critic interface.
 
     This abstraction slightly specializes the very general `_Critic` interface to output a state-value and as such
     provides an interface for crticising purely based on a state saying how good or bad a given state is to be in.
     """
-
-    settings: StateCriticSettings
-
-    def __init__(self, settings: StateCriticSettings) -> None:
-        """Initialize this generic state critic interface."""
-        super().__init__(settings)
 
     @abstractmethod
     def crit(self, state: State) -> Tensor:
@@ -75,19 +72,13 @@ class StateCritic(Critic):
         ...
 
 
-class ActionCritic(Critic):
+class ActionValueCritic(_Critic):
     """Generic abstract action-value critic interface.
 
     This abstraction slightly specializes the very general `_Critic` interface to output an action-value and as such
     provides an interface for criticising based on an action commited in a particular state saying how good or bad
     taking that action in that state is.
     """
-
-    settings: ActionCriticSettings
-
-    def __init__(self, settings: ActionCriticSettings) -> None:
-        """Initialize this generic actor critic interface."""
-        super().__init__(settings)
 
     @abstractmethod
     def crit(self, state: State, action: Action) -> Tensor:

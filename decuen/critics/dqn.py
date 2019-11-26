@@ -19,13 +19,13 @@ from torch import from_numpy, zeros  # pylint: disable=no-name-in-module
 from torch.nn import Linear, Module, Sequential
 from torch.optim import Optimizer  # type: ignore
 
-from decuen.critics._critic import ActionCritic, ActionCriticSettings
+from decuen.critics._critic import ActionValueCritic, CriticSettings
 from decuen.structs import Action, State, Tensor, Transition, batch_transitions
 
 
 @dataclass
-class DQNCriticSettings(ActionCriticSettings):
-    """Settings for Q-table critics."""
+class DQNCriticSettings(CriticSettings):
+    """Settings for Q-network critics."""
 
     target_update: int
     double: bool
@@ -34,7 +34,7 @@ class DQNCriticSettings(ActionCriticSettings):
     loss: Module
 
 
-class DQNCritic(ActionCritic):
+class DQNCritic(ActionValueCritic):
     """Deep Q-network critic.
 
     See [1], [2], [3] for more details.
@@ -101,5 +101,5 @@ class DQNCritic(ActionCritic):
             self._target_network.load_state_dict(self.network.state_dict())
 
     def crit(self, state: State, action: Action) -> Tensor:
-        """Return the quality of taking an action or tensor of actions in a state."""
+        """Estimate the quality of taking an action or tensor of actions in a state."""
         return self.network(state).detach()[action]
