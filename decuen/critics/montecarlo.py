@@ -36,5 +36,4 @@ class MonteCarloCritic(AdvantageCritic):
         batch = batch_transitions([trajectory] if isinstance(trajectory, Transition) else trajectory)
         discounted_rewards = tensor([self.settings.discount_factor]).pow(arange(batch.rewards.size()[0]))
         advantages = discounted_rewards.flip(0).cumsum(0).flip(0)  # Reverse cumulative sum (causality)
-        print(advantages)
         return advantages
