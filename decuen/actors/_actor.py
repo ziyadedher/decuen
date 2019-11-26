@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import MutableSequence, Optional, Type
 
-import torch.nn.functional as F
 from gym.spaces import Box, Discrete  # type: ignore
 from torch import diag_embed
+from torch.nn.functional import softplus
 
 from decuen.critics import ActionCritic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
@@ -103,6 +103,6 @@ class Actor(ABC, Contextful):
 
         if self.settings.dist is MultivariateNormal:
             half = params.size()[1] // 2
-            return MultivariateNormal(params[:, :half], diag_embed(F.softplus(params[:, half:])))
+            return MultivariateNormal(params[:, :half], diag_embed(softplus(params[:, half:])))
 
         raise NotImplementedError("actors do not support this action distribution yet")
