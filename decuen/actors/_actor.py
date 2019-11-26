@@ -6,7 +6,7 @@ from functools import reduce
 from typing import MutableSequence, Optional, Type
 
 from gym.spaces import Box, Discrete  # type: ignore
-from torch import diag
+from torch import diag_embed
 
 from decuen.critics import ActionCritic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
@@ -19,6 +19,7 @@ class ActorSettings:
     """Basic common settings for all actor-learners."""
 
     dist: Type[Distribution]
+    discount_factor: float
 
 
 class Actor(ABC, Contextful):
@@ -85,15 +86,22 @@ class Actor(ABC, Contextful):
     def _gen_behaviour(self, params: Tensor) -> Distribution:
         """Generate the behavioural policy based on the given parameters and the distribution family of this actor."""
         # TODO: check for parameter size mismatches
+        # TODO: support params being for multiple different distributions
+
+        if len(params.size()) == 1:
+            params = params.unsqueeze(0)
+        elif len(params.size()) > 2:
+            # FIXME: better error message
+            raise ValueError("unknown dimensionality")
 
         if self.settings.dist is Categorical:
-            return Categorical(params)
+            return Categorical(logits=params)
 
         if self.settings.dist is Normal:
-            return Normal(params[0], params[1])
+            return Normal(params[:, 0], params[:, 1])
 
         if self.settings.dist is MultivariateNormal:
-            half = params.size()[0] / 2
-            return MultivariateNormal(params[:half], diag(params[:half]))
+            half = params.size()[1] / 2
+            return MultivariateNormal(params[:, :half], diag_embed(params[:, :half]))
 
         raise NotImplementedError("actors do not support this action distribution yet")
