@@ -61,4 +61,6 @@ class StateValueCritic(Critic):
 
     def _advantage(self, trajectory: Trajectory) -> Tensor:
         batch = batch_transitions(trajectory)
-        return self.network(batch.states).detach()
+        new_values = self.network(batch.new_states).detach()
+        values = self.network(batch.states).detach()
+        return batch.rewards + self.settings.discount_factor * new_values - values
