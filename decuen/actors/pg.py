@@ -11,7 +11,7 @@ from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.actors._actor import Actor, ActorSettings
-from decuen.critics import AdvantageCritic
+from decuen.critics import Critic
 from decuen.structs import State, Tensor, Trajectory, batch_transitions
 from decuen.utils.module_construction import finalize_module
 
@@ -23,7 +23,7 @@ class PGActorSettings(ActorSettings):
     optimizer: Optimizer
 
 
-class PGActor(Actor[AdvantageCritic]):
+class PGActor(Actor[Critic]):
     """Policy-gradient actor-learner.
 
     Uses a function approximator to generate the parameters for a policy and improves that estimator.

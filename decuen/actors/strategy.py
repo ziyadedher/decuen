@@ -8,7 +8,7 @@ from torch import arange
 
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.actors.strats import Strategy
-from decuen.critics import ActionValueCritic
+from decuen.critics import QValueCritic
 from decuen.structs import State, Tensor, Trajectory
 
 
@@ -17,7 +17,7 @@ class StrategyActorSettings(ActorSettings):
     """Settings for strategy-based actors."""
 
 
-class StrategyActor(Actor[ActionValueCritic]):
+class StrategyActor(Actor[QValueCritic]):
     """Strategy-based actor.
 
     Generates a policy purely based on critic values and a mechanism of policy extraction called a strategy.

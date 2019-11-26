@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from decuen.actors import StrategyActor, StrategyActorSettings
 from decuen.actors.strats import Strategy
 from decuen.agents._agent import Agent, AgentSettings
-from decuen.critics import ActionValueCritic
+from decuen.critics import QValueCritic
 from decuen.memories import Memory
 
 
@@ -17,7 +17,7 @@ class CriticAgentSettings(AgentSettings, StrategyActorSettings):
 class CriticAgent(Agent):
     """High-level reinforcement learning agent based on just a critic and strategy for action selection."""
 
-    def __init__(self, memory: Memory, strategy: Strategy, critic: ActionValueCritic,
+    def __init__(self, memory: Memory, strategy: Strategy, critic: QValueCritic,
                  settings: CriticAgentSettings) -> None:
         """Initialize a generic critic agent."""
         super().__init__(memory, StrategyActor(strategy, settings), critic, settings)

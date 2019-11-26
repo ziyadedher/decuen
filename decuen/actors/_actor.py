@@ -9,7 +9,7 @@ from gym.spaces import Box, Discrete  # type: ignore
 from torch import diag_embed
 from torch.nn.functional import softplus
 
-from decuen.critics import ActionValueCritic, AdvantageCritic, StateValueCritic
+from decuen.critics import Critic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
 from decuen.structs import State, Tensor, Trajectory
 from decuen.utils.context import Contextful
@@ -23,7 +23,7 @@ class ActorSettings:
     discount_factor: float
 
 
-CriticType = TypeVar("CriticType", StateValueCritic, ActionValueCritic, AdvantageCritic)
+CriticType = TypeVar("CriticType", bound=Critic)
 
 
 class Actor(Generic[CriticType], ABC, Contextful):
