@@ -20,7 +20,7 @@ from torch.nn import Linear, Module, Sequential
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._critic import ActionCritic, ActionCriticSettings
-from decuen.structs import Action, State, Tensor, Transition
+from decuen.structs import Action, State, Tensor, Transition, batch_transitions
 
 
 @dataclass
@@ -74,9 +74,9 @@ class DQNCritic(ActionCritic):
         if not transitions:
             return
 
-        batch = Transition.batch(transitions)
+        batch = batch_transitions(transitions)
 
-        values = self.network(batch.states).gather(1, batch.actions.unsqueeze(1))
+        values = self.network(batch.states).gather(1, batch.actions)
         new_states_not_terminal = batch.new_states[~batch.terminals]
 
         next_values = zeros(len(transitions))

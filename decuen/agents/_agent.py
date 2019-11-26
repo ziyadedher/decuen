@@ -56,7 +56,10 @@ class Agent(Contextful):
 
     def init(self, state: np.ndarray) -> np.ndarray:
         """Initialize an agent at the start of a new episode."""
-        return self._step(tensor(state.astype(np.float32)), None, None).numpy()
+        action = self._step(tensor(state.astype(np.float32)), None, None).numpy()
+        if action.shape == (1,):
+            action = action.reshape(())
+        return action
 
     def step(self, state: np.ndarray, reward: float, terminal: bool) -> np.ndarray:
         """Step based on a new state, a terminal state signal, and a reward signal.
@@ -65,7 +68,10 @@ class Agent(Contextful):
         was called. The reward signal corresponds to the transition that caused the migration to this state and the
         terminal signal corresponds to the currently inputted state.
         """
-        return self._step(tensor(state.astype(np.float32)), reward, terminal).numpy()
+        action = self._step(tensor(state.astype(np.float32)), reward, terminal).numpy()
+        if action.shape == (1,):
+            action = action.reshape(())
+        return action
 
     def _step(self, state: State, reward: Optional[float], terminal: Optional[bool]) -> Action:
         action = self._act(state)
