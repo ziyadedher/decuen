@@ -4,11 +4,11 @@ Simply estimates the state values based on a Monte Carlo estimate of the expecte
 """
 
 from dataclasses import dataclass
-from typing import MutableSequence, Union
+from typing import MutableSequence
 
 from torch import arange
 
-from decuen.critics._critic import AdvantageCritic, CriticSettings
+from decuen.critics._critic import Critic, CriticSettings
 from decuen.structs import (Tensor, Trajectory, Transition, batch_transitions,
                             tensor)
 
@@ -18,7 +18,7 @@ class MonteCarloCriticSettings(CriticSettings):
     """Settings for Monte Carlo critics."""
 
 
-class MonteCarloCritic(AdvantageCritic):
+class MonteCarloCritic(Critic):
     """Monte Carlo critic."""
 
     def __init__(self, settings: MonteCarloCriticSettings) -> None:
@@ -28,12 +28,8 @@ class MonteCarloCritic(AdvantageCritic):
     def learn(self, transitions: MutableSequence[Transition]) -> None:
         """Do nothing. Monte Carlo critic does not learn."""
 
-    def advantage(self, trajectory: Union[Transition, Trajectory]) -> Tensor:
-        """Estimate the advantage of every transition in a trajectory using a Monte Carlo method.
-
-        Note that this advantage estimate tends to have high variance, even when using a baseline.
-        """
-        batch = batch_transitions([trajectory] if isinstance(trajectory, Transition) else trajectory)
+    def _advantage(self, trajectory: Trajectory) -> Tensor:
+        batch = batch_transitions(trajectory)
         discounted_rewards = tensor([self.settings.discount_factor]).pow(arange(batch.rewards.size()[0]))
         advantages = discounted_rewards.flip(0).cumsum(0).flip(0)  # Reverse cumulative sum (causality)
         return advantages
