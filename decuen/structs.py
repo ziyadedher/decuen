@@ -4,7 +4,7 @@ These structures should only be used internally within the framework and their A
 """
 
 from dataclasses import dataclass
-from typing import MutableSequence, Optional, Sequence
+from typing import Optional, Sequence
 
 import torch
 
@@ -47,16 +47,16 @@ class Transition:
     state_value: Optional[float] = None
     action_value: Optional[float] = None
 
-    @staticmethod
-    def batch(transitions: MutableSequence['Transition']) -> BatchedTransitions:
-        """Batch a sequence of transitions into the format expected by our training procedures."""
-        states = torch.stack([transition.state for transition in transitions])
-        actions = torch.stack([transition.action for transition in transitions])
-        new_states = torch.stack([transition.new_state for transition in transitions])
-        rewards = tensor([transition.reward for transition in transitions])
-        terminals = tensor([transition.terminal for transition in transitions])
-
-        return BatchedTransitions(states, actions, new_states, rewards, terminals)
-
 
 Trajectory = Sequence[Transition]
+
+
+def batch_transitions(transitions: Sequence[Transition]) -> BatchedTransitions:
+    """Batch a sequence of transitions into the format expected by our training procedures."""
+    states = torch.stack([transition.state for transition in transitions])
+    actions = torch.stack([transition.action for transition in transitions])
+    new_states = torch.stack([transition.new_state for transition in transitions])
+    rewards = tensor([transition.reward for transition in transitions])
+    terminals = tensor([transition.terminal for transition in transitions])
+
+    return BatchedTransitions(states, actions, new_states, rewards, terminals)
