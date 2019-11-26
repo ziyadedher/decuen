@@ -45,7 +45,7 @@ class PGActor(Actor):
 
         batch = batch_transitions(trajectory)
         policies = self.act(batch.states)
-        neglog = -policies.log_prob(batch.actions.squeeze(1))
+        neglog = -policies.log_prob(batch.actions)
 
         discounted_rewards = tensor([self.settings.discount_factor]).pow(arange(batch.rewards.size()[0]))
         advantage_estim = discounted_rewards.flip(0).cumsum(0).flip(0)  # Reverse cumulative sum (causality)

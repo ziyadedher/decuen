@@ -56,10 +56,7 @@ class Agent(Contextful):
 
     def init(self, state: np.ndarray) -> np.ndarray:
         """Initialize an agent at the start of a new episode."""
-        action = self._step(tensor(state.astype(np.float32)), None, None).numpy()
-        if action.shape == (1,):
-            action = action.reshape(())
-        return action
+        return self._step(tensor(state.astype(np.float32)), None, None).numpy()
 
     def step(self, state: np.ndarray, reward: float, terminal: bool) -> np.ndarray:
         """Step based on a new state, a terminal state signal, and a reward signal.
@@ -68,13 +65,10 @@ class Agent(Contextful):
         was called. The reward signal corresponds to the transition that caused the migration to this state and the
         terminal signal corresponds to the currently inputted state.
         """
-        action = self._step(tensor(state.astype(np.float32)), reward, terminal).numpy()
-        if action.shape == (1,):
-            action = action.reshape(())
-        return action
+        return self._step(tensor(state.astype(np.float32)), reward, terminal).numpy()
 
     def _step(self, state: State, reward: Optional[float], terminal: Optional[bool]) -> Action:
-        action = self._act(state)
+        action = self._act(state).squeeze(0)
 
         # If we have no history in this episode, we still don't have anything to store
         if self._state is None or self._action is None or reward is None or terminal is None:
