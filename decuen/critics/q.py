@@ -1,4 +1,4 @@
-"""Deep Q-network action critics.
+"""Interfaces for deep Q critics.
 
 Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms to train action critics.
 
@@ -16,16 +16,18 @@ from typing import MutableSequence
 
 from gym.spaces import Discrete  # type: ignore
 from torch import from_numpy, zeros  # pylint: disable=no-name-in-module
-from torch.nn import Linear, Module, Sequential
+from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
-from decuen.critics._critic import ActionCritic, ActionCriticSettings
-from decuen.structs import Action, State, Tensor, Transition
+from decuen.critics._critic import Critic, CriticSettings
+from decuen.structs import (Action, State, Tensor, Trajectory, Transition,
+                            batch_transitions)
+from decuen.utils.module_construction import finalize_module
 
 
 @dataclass
-class DQNCriticSettings(ActionCriticSettings):
-    """Settings for Q-table critics."""
+class QValueCriticSettings(CriticSettings):
+    """Settings for Q-network critics."""
 
     target_update: int
     double: bool
@@ -34,18 +36,18 @@ class DQNCriticSettings(ActionCriticSettings):
     loss: Module
 
 
-class DQNCritic(ActionCritic):
-    """Deep Q-network critic.
+class QValueCritic(Critic):
+    """Deep Q critic, or action-value critic.
 
     See [1], [2], [3] for more details.
     """
 
     action_space: Discrete
-    settings: DQNCriticSettings
+    settings: QValueCriticSettings
     network: Module
     _target_network: Module
 
-    def __init__(self, model: Module, settings: DQNCriticSettings) -> None:
+    def __init__(self, model: Module, settings: QValueCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 
@@ -53,16 +55,7 @@ class DQNCritic(ActionCritic):
         if not isinstance(self.action_space, Discrete):
             raise TypeError("action space for Q-network critic must be discrete")
 
-        # TODO: generalize this to other classes
-        try:
-            size = model(from_numpy(self.state_space.sample())).size()
-        except RuntimeError:
-            raise ValueError("given model is incompatible with the state space")
-        if len(size) != 1:
-            raise ValueError(f"given model must have one-dimensional output, instead got output shape {size}")
-
-        final_layer = Linear(size[0], self.action_space.n)
-        self.network = Sequential(model, final_layer)
+        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample()), self.action_space.n)
         self._target_network = copy.deepcopy(self.network)
         self._target_network.eval()
 
@@ -74,7 +67,7 @@ class DQNCritic(ActionCritic):
         if not transitions:
             return
 
-        batch = Transition.batch(transitions)
+        batch = batch_transitions(transitions)
 
         values = self.network(batch.states).gather(1, batch.actions.unsqueeze(1))
         new_states_not_terminal = batch.new_states[~batch.terminals]
@@ -101,5 +94,9 @@ class DQNCritic(ActionCritic):
             self._target_network.load_state_dict(self.network.state_dict())
 
     def crit(self, state: State, action: Action) -> Tensor:
-        """Return the quality of taking an action or tensor of actions in a state."""
+        """Estimate the quality of taking an action or tensor of actions in a state."""
         return self.network(state).detach()[action]
+
+    def _advantage(self, trajectory: Trajectory) -> Tensor:
+        batch = batch_transitions(trajectory)
+        return self.network(batch.states).detach().gather(1, batch.actions.unsqueeze(1))

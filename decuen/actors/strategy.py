@@ -1,29 +1,39 @@
 """Implementation of a strategy-based actor."""
 
+from dataclasses import dataclass
 from typing import MutableSequence
 
 from gym.spaces import Discrete  # type: ignore
+from torch import arange
 
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.actors.strats import Strategy
-from decuen.structs import State, Tensor, Trajectory, arange
+from decuen.critics import QValueCritic
+from decuen.structs import State, Tensor, Trajectory
 
 
-class StrategyActor(Actor):
+@dataclass
+class StrategyActorSettings(ActorSettings):
+    """Settings for strategy-based actors."""
+
+
+class StrategyActor(Actor[QValueCritic]):
     """Strategy-based actor.
 
     Generates a policy purely based on critic values and a mechanism of policy extraction called a strategy.
     """
 
-    def __init__(self, strategy: Strategy) -> None:
+    settings: StrategyActorSettings
+
+    def __init__(self, strategy: Strategy, settings: StrategyActorSettings) -> None:
         """Initialize a strategy actor."""
-        super().__init__(ActorSettings(dist=strategy.distribution_type))
+        super().__init__(settings)
         self.strategy = strategy
 
     def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
         """Do nothing. Learning is not supported for strategy-based actors."""
 
-    def _generate_policy_parameters(self, state: State) -> Tensor:
+    def _gen_policy_params(self, state: State) -> Tensor:
         """Generate policy parameters on-the-fly based on an environment state."""
         if not self.critic:
             raise ValueError("strategy actor must be assigned a critic")

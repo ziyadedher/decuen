@@ -1,8 +1,10 @@
 """Implementation of a random action selection strategy."""
 
+from torch import ones
+
 from decuen.actors.strats._strategy import Strategy
 from decuen.dists import Categorical
-from decuen.structs import Tensor, ones
+from decuen.structs import Tensor
 
 
 # pylint: disable=too-few-public-methods

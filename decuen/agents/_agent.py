@@ -1,13 +1,12 @@
 """Interfaces for arbitrary reinforcement learning agents."""
 
-from abc import ABC
 from dataclasses import dataclass
 from typing import List, Optional
 
 import numpy as np  # type: ignore
 
 from decuen.actors import Actor
-from decuen.critics import ActionCritic
+from decuen.critics import Critic
 from decuen.memories import Memory
 from decuen.structs import Action, State, Transition, tensor
 from decuen.utils.context import Contextful
@@ -18,7 +17,7 @@ class AgentSettings:
     """Basic common hyperparameter settings for all agents."""
 
 
-class Agent(ABC, Contextful):
+class Agent(Contextful):
     """High-level reinforcement learning agent abstraction.
 
     This abstraction implements essentially no logic instead delegating all processing to the respective subclasses
@@ -32,7 +31,7 @@ class Agent(ABC, Contextful):
     memory: Memory
     settings: AgentSettings
     actor: Actor
-    critic: ActionCritic
+    critic: Critic
 
     # Current state of the agent
     _state: Optional[State]
@@ -41,7 +40,7 @@ class Agent(ABC, Contextful):
     # Current agent trajectory
     _trajectory: List[Transition]
 
-    def __init__(self, memory: Memory, actor: Actor, critic: ActionCritic, settings: AgentSettings) -> None:
+    def __init__(self, memory: Memory, actor: Actor, critic: Critic, settings: AgentSettings) -> None:
         """Initialize a generic agent."""
         super().__init__()
         self.memory = memory
@@ -69,7 +68,7 @@ class Agent(ABC, Contextful):
         return self._step(tensor(state.astype(np.float32)), reward, terminal).numpy()
 
     def _step(self, state: State, reward: Optional[float], terminal: Optional[bool]) -> Action:
-        action = self._act(state)
+        action = self._act(state).squeeze(0)
 
         # If we have no history in this episode, we still don't have anything to store
         if self._state is None or self._action is None or reward is None or terminal is None:
