@@ -2,10 +2,10 @@
 
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.actors.pg import PGActor, PGActorSettings
-from decuen.actors.strategy import StrategyActor
+from decuen.actors.strategy import StrategyActor, StrategyActorSettings
 
 __all__ = [
     "Actor", "ActorSettings",
-    "StrategyActor",
+    "StrategyActor", "StrategyActorSettings",
     "PGActor", "PGActorSettings"
 ]

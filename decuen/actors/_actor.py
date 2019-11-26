@@ -3,13 +3,13 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
-from typing import MutableSequence, Optional, Type
+from typing import Generic, MutableSequence, Optional, Type, TypeVar
 
 from gym.spaces import Box, Discrete  # type: ignore
 from torch import diag_embed
 from torch.nn.functional import softplus
 
-from decuen.critics import ActionCritic
+from decuen.critics import ActionValueCritic, AdvantageCritic, StateValueCritic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
 from decuen.structs import State, Tensor, Trajectory
 from decuen.utils.context import Contextful
@@ -23,7 +23,10 @@ class ActorSettings:
     discount_factor: float
 
 
-class Actor(ABC, Contextful):
+CriticType = TypeVar("CriticType", StateValueCritic, ActionValueCritic, AdvantageCritic)
+
+
+class Actor(Generic[CriticType], ABC, Contextful):
     """Generic abstract actor-learner interface.
 
     This abstraction provides interfaces for the two main functionalities of an actor-learner:
@@ -32,14 +35,31 @@ class Actor(ABC, Contextful):
     """
 
     settings: ActorSettings
-    critic: Optional[ActionCritic]
+
+    _critic: Optional[CriticType]
 
     @abstractmethod
     def __init__(self, settings: ActorSettings) -> None:
         """Initialize a generic actor-learner."""
         super().__init__()
         self.settings = settings
-        self.critic = None
+
+        self._critic = None
+
+    @property
+    def critic(self) -> CriticType:
+        """Get the critic associated with this actor."""
+        if not self._critic:
+            raise ValueError("no critic associated with this actor")
+        return self._critic
+
+    @critic.setter
+    def critic(self, critic: CriticType) -> None:
+        """Set the critic of this actor.
+
+        You probably do not want to do this manually.
+        """
+        self._critic = critic
 
     def act(self, state: State) -> Distribution:
         """Construct a parameterized policy and return the generated distribution."""

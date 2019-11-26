@@ -4,14 +4,15 @@ Based on REINFORCE algorithm with causality and baselines.
 """
 
 from dataclasses import dataclass
-from typing import ClassVar, MutableSequence
+from typing import MutableSequence
 
-from torch import arange, from_numpy
-from torch.nn import Module, NLLLoss
+from torch import from_numpy
+from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.actors._actor import Actor, ActorSettings
-from decuen.structs import State, Tensor, Trajectory, batch_transitions, tensor
+from decuen.critics import AdvantageCritic
+from decuen.structs import State, Tensor, Trajectory, batch_transitions
 from decuen.utils.module_construction import finalize_module
 
 
@@ -22,14 +23,13 @@ class PGActorSettings(ActorSettings):
     optimizer: Optimizer
 
 
-class PGActor(Actor):
+class PGActor(Actor[AdvantageCritic]):
     """Policy-gradient actor-learner.
 
     Uses a function approximator to generate the parameters for a policy and improves that estimator.
     """
 
     settings: PGActorSettings
-    loss: ClassVar[Module] = NLLLoss()
 
     def __init__(self, model: Module, settings: PGActorSettings) -> None:
         """Initialize a policy-gradient actor-learner."""
@@ -47,11 +47,9 @@ class PGActor(Actor):
         policies = self.act(batch.states)
         neglog = -policies.log_prob(batch.actions)
 
-        discounted_rewards = tensor([self.settings.discount_factor]).pow(arange(batch.rewards.size()[0]))
-        advantage_estim = discounted_rewards.flip(0).cumsum(0).flip(0)  # Reverse cumulative sum (causality)
+        advantage = self.critic.advantage(trajectory)
 
-        loss = neglog * advantage_estim
-        loss = loss.sum()
+        loss = (neglog * advantage).sum()
 
         self.settings.optimizer.zero_grad()
         loss.backward()
