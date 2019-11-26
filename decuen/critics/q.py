@@ -24,7 +24,7 @@ from decuen.structs import Action, State, Tensor, Transition, batch_transitions
 
 
 @dataclass
-class DQNCriticSettings(CriticSettings):
+class QCriticSettings(CriticSettings):
     """Settings for Q-network critics."""
 
     target_update: int
@@ -34,18 +34,18 @@ class DQNCriticSettings(CriticSettings):
     loss: Module
 
 
-class DQNCritic(ActionValueCritic):
+class QCritic(ActionValueCritic):
     """Deep Q-network critic.
 
     See [1], [2], [3] for more details.
     """
 
     action_space: Discrete
-    settings: DQNCriticSettings
+    settings: QCriticSettings
     network: Module
     _target_network: Module
 
-    def __init__(self, model: Module, settings: DQNCriticSettings) -> None:
+    def __init__(self, model: Module, settings: QCriticSettings) -> None:
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 

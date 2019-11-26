@@ -4,9 +4,9 @@ from typing import Union
 
 from decuen.critics._critic import (ActionValueCritic, AdvantageCritic,
                                     CriticSettings, StateValueCritic)
-from decuen.critics.dqn import DQNCritic, DQNCriticSettings
 from decuen.critics.montecarlo import (MonteCarloCritic,
                                        MonteCarloCriticSettings)
+from decuen.critics.q import QCritic, QCriticSettings
 
 Critic = Union[ActionValueCritic, StateValueCritic, AdvantageCritic]
 
@@ -15,6 +15,6 @@ __all__ = [
     "StateValueCritic",
     "ActionValueCritic",
     "AdvantageCritic",
-    "DQNCritic", "DQNCriticSettings",
+    "QCritic", "QCriticSettings",
     "MonteCarloCritic", "MonteCarloCriticSettings",
 ]
