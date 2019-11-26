@@ -23,19 +23,19 @@ class UniformMemory(Memory):
     def store_transition(self, transition: Transition) -> None:
         """Store a transition in this memory mechanism's buffer with any needed associated information."""
         self.transition = transition
-        if self._transitions_cap is not None and len(self._transition_buffer) == self._transitions_cap:
-            self._transition_buffer.pop(0)
-        self._transition_buffer.append(transition)
+        if self._transitions_cap is not None and len(self.transitions) == self._transitions_cap:
+            self.transitions.pop(0)
+        self.transitions.append(transition)
 
     def _replay_transitions(self, num: int) -> List[Transition]:
-        return random.choices(self._transition_buffer, k=num)
+        return random.choices(self.transitions, k=num)
 
     def store_trajectory(self, trajectory: Trajectory) -> None:
         """Store a trajectory in this memory mechanism's buffer consisting of a sequence of transitions."""
         self.trajectory = trajectory
-        if self._trajectories_cap is not None and len(self._trajectory_buffer) == self._trajectories_cap:
-            self._trajectory_buffer.pop(0)
-        self._trajectory_buffer.append(trajectory)
+        if self._trajectories_cap is not None and len(self.trajectories) == self._trajectories_cap:
+            self.trajectories.pop(0)
+        self.trajectories.append(trajectory)
 
     def _replay_trajectories(self, num: int) -> List[Trajectory]:
-        return random.choices(self._trajectory_buffer, k=num)
+        return random.choices(self.trajectories, k=num)

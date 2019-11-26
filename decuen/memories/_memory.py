@@ -21,8 +21,8 @@ class Memory(ABC):
     transition_replay_num: int
     trajectory_replay_num: int
 
-    _transition_buffer: MutableSequence[Transition]
-    _trajectory_buffer: MutableSequence[Trajectory]
+    transitions: MutableSequence[Transition]
+    trajectories: MutableSequence[Trajectory]
 
     def __init__(self,
                  transition_buffer: MutableSequence[Transition], trajectory_buffer: MutableSequence[Trajectory],
@@ -32,8 +32,8 @@ class Memory(ABC):
         self.trajectory = None
         self.transition_replay_num = transition_replay_num
         self.trajectory_replay_num = trajectory_replay_num
-        self._transition_buffer = transition_buffer
-        self._trajectory_buffer = trajectory_buffer
+        self.transitions = transition_buffer
+        self.trajectories = trajectory_buffer
 
     @abstractmethod
     def store_transition(self, transition: Transition) -> None:
@@ -42,7 +42,7 @@ class Memory(ABC):
 
     def replay_transitions(self, num: Optional[int] = None) -> MutableSequence[Transition]:
         """Replay experiences from our memory buffer based on some mechanism."""
-        return self._replay_transitions(min(len(self._transition_buffer), num or self.transition_replay_num))
+        return self._replay_transitions(min(len(self.transitions), num or self.transition_replay_num))
 
     @abstractmethod
     def _replay_transitions(self, num: int) -> MutableSequence[Transition]:
@@ -55,7 +55,7 @@ class Memory(ABC):
 
     def replay_trajectories(self, num: Optional[int] = None) -> MutableSequence[Trajectory]:
         """Replay trajectories from our memory buffer based on some mechanism."""
-        return self._replay_trajectories(min(len(self._trajectory_buffer), num or self.trajectory_replay_num))
+        return self._replay_trajectories(min(len(self.trajectories), num or self.trajectory_replay_num))
 
     @abstractmethod
     def _replay_trajectories(self, num: int) -> MutableSequence[Trajectory]:
@@ -68,5 +68,5 @@ class Memory(ABC):
         """
         self.transition = None
         self.trajectory = None
-        self._transition_buffer.clear()
-        self._trajectory_buffer.clear()
+        self.transitions.clear()
+        self.trajectories.clear()
