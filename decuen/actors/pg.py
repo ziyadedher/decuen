@@ -41,19 +41,18 @@ class PGActor(Actor[AdvantageCritic]):
 
     def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
         """Update policy based on past trajectories."""
-        trajectory = trajectories[0]
+        for trajectory in trajectories:
+            batch = batch_transitions(trajectory)
+            policies = self.act(batch.states)
+            neglog = -policies.log_prob(batch.actions)
 
-        batch = batch_transitions(trajectory)
-        policies = self.act(batch.states)
-        neglog = -policies.log_prob(batch.actions)
+            advantage = self.critic.advantage(trajectory)
 
-        advantage = self.critic.advantage(trajectory)
+            loss = (neglog * advantage).sum()
 
-        loss = (neglog * advantage).sum()
-
-        self.settings.optimizer.zero_grad()
-        loss.backward()
-        self.settings.optimizer.step()
+            self.settings.optimizer.zero_grad()
+            loss.backward()
+            self.settings.optimizer.step()
 
     def _gen_policy_params(self, state: State) -> Tensor:
         """Generate policy parameters on-the-fly based on an environment state."""
