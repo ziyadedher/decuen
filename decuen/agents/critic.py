@@ -1,3 +1,5 @@
+"""Interface for agents based soley on critics for guided action selection."""
+
 from dataclasses import dataclass
 
 from decuen.actors import StrategyActor, StrategyActorSettings
@@ -18,4 +20,4 @@ class CriticAgent(Agent):
     def __init__(self, memory: Memory, strategy: Strategy, critic: ActionValueCritic,
                  settings: CriticAgentSettings) -> None:
         """Initialize a generic critic agent."""
-        super().__init__(memory, StrategyActor(strategy, critic, settings), critic, settings)
+        super().__init__(memory, StrategyActor(strategy, settings), critic, settings)

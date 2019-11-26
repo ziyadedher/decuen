@@ -1,3 +1,5 @@
+"""Interface for agents based solely on actors with Monte Carlo reward estimation for action selection."""  
+
 from dataclasses import dataclass
 
 from decuen.actors import Actor
