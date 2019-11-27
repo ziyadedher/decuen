@@ -8,7 +8,7 @@ import numpy as np  # type: ignore
 from decuen.actors import Actor
 from decuen.critics import Critic
 from decuen.memories import Memory
-from decuen.structs import Action, State, Transition, tensor
+from decuen.structs import Action, State, Trajectory, Transition, tensor
 from decuen.utils.context import Contextful
 
 
@@ -85,7 +85,7 @@ class Agent(Contextful):
         # if we reached the end of the episode or just continue normally otherwise
         self.memory.store_transition(transition)
         if terminal:
-            self.memory.store_trajectory(self._trajectory)
+            self.memory.store_trajectory(Trajectory(self._trajectory))
             self._state = None
             self._action = None
             self._trajectory = []
@@ -108,5 +108,6 @@ class Agent(Contextful):
 
     def learn(self) -> None:
         """Learn or improve this agent from memory."""
-        self.actor.learn(self.memory.replay_trajectories())
+        for trajectory in self.memory.replay_trajectories():
+            self.actor.learn(trajectory)
         self.critic.learn(self.memory.replay_transitions())
