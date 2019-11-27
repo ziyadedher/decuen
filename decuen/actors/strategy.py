@@ -1,7 +1,6 @@
 """Implementation of a strategy-based actor."""
 
 from dataclasses import dataclass
-from typing import MutableSequence
 
 from gym.spaces import Discrete  # type: ignore
 from torch import arange
@@ -9,7 +8,7 @@ from torch import arange
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.actors.strats import Strategy
 from decuen.critics import QValueCritic
-from decuen.structs import State, Tensor, Trajectory
+from decuen.structs import Experience, State, Tensor
 
 
 @dataclass
@@ -30,7 +29,7 @@ class StrategyActor(Actor[QValueCritic]):
         super().__init__(settings)
         self.strategy = strategy
 
-    def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
+    def learn(self, experience: Experience) -> None:
         """Do nothing. Learning is not supported for strategy-based actors."""
 
     def _gen_policy_params(self, state: State) -> Tensor:

@@ -4,7 +4,6 @@ Based on REINFORCE algorithm with causality and baselines.
 """
 
 from dataclasses import dataclass
-from typing import MutableSequence
 
 from torch import from_numpy
 from torch.nn import Module
@@ -12,7 +11,8 @@ from torch.optim import Optimizer  # type: ignore
 
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.critics import Critic
-from decuen.structs import State, Tensor, Trajectory, batch_transitions
+from decuen.structs import (Experience, State, Tensor, Trajectory,
+                            batch_experience)
 from decuen.utils.module_construction import finalize_module
 
 
@@ -35,24 +35,31 @@ class PGActor(Actor[Critic]):
         """Initialize a policy-gradient actor-learner."""
         super().__init__(settings)
 
-        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample()),
+        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample()).float(),
                                                     self._num_policy_params)
         self.settings.optimizer.add_param_group({"params": final_layer.parameters()})
 
-    def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
-        """Update policy based on past trajectories."""
-        for trajectory in trajectories:
-            batch = batch_transitions(trajectory)
-            policies = self.act(batch.states)
-            neglog = -policies.log_prob(batch.actions)
+    def learn(self, experience: Experience) -> None:
+        """Update policy based on an experience."""
+        if not experience:
+            return
 
-            advantage = self.critic.advantage(trajectory)
+        if isinstance(experience, Trajectory):
+            batch = experience.batched
+        else:
+            batch = batch_experience(experience)
 
-            loss = (neglog * advantage).sum()
+        policies = self.act(batch.states)
+        neglogs = -policies.log_prob(batch.actions)
 
-            self.settings.optimizer.zero_grad()
-            loss.backward()
-            self.settings.optimizer.step()
+        advantages = self.critic.advantage(experience)
+        advantages -= advantages.mean()
+        advantages /= advantages.std()
+        loss = (neglogs * advantages).sum()
+
+        self.settings.optimizer.zero_grad()
+        loss.backward()
+        self.settings.optimizer.step()
 
     def _gen_policy_params(self, state: State) -> Tensor:
         """Generate policy parameters on-the-fly based on an environment state."""

@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
-from typing import Generic, MutableSequence, Optional, Type, TypeVar
+from typing import Generic, Optional, Type, TypeVar
 
 from gym.spaces import Box, Discrete  # type: ignore
 from torch import diag_embed
@@ -11,7 +11,7 @@ from torch.nn.functional import softplus
 
 from decuen.critics import Critic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
-from decuen.structs import State, Tensor, Trajectory
+from decuen.structs import Experience, State, Tensor
 from decuen.utils.context import Contextful
 
 
@@ -68,8 +68,8 @@ class Actor(Generic[CriticType], ABC, Contextful):
     # TODO: support learning from transitions
     # XXX: possibly return loss or some other metric?
     @abstractmethod
-    def learn(self, trajectories: MutableSequence[Trajectory]) -> None:
-        """Update policy based on past trajectories."""
+    def learn(self, experience: Experience) -> None:
+        """Update policy based on an experience."""
         ...
 
     @abstractmethod
