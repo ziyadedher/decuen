@@ -2,9 +2,8 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import MutableSequence, Union
 
-from decuen.structs import Tensor, Trajectory, Transition
+from decuen.structs import Experience, Tensor
 from decuen.utils.context import Contextful
 
 
@@ -41,16 +40,11 @@ class Critic(ABC, Contextful):
     # TODO: support learning from trajectories
     # XXX: possibly return loss or some other metric?
     @abstractmethod
-    def learn(self, transitions: MutableSequence[Transition]) -> None:
-        """Update internal critic representation based on past transitions."""
+    def learn(self, experience: Experience) -> None:
+        """Update internal critic representation based on a past experience."""
         ...
 
-    def advantage(self, trajectory: Union[Transition, Trajectory]) -> Tensor:
-        """Estimate the advantage of every transition in a trajectory."""
-        if isinstance(trajectory, Transition):
-            return self._advantage([trajectory])
-        return self._advantage(trajectory)
-
     @abstractmethod
-    def _advantage(self, trajectory: Trajectory) -> Tensor:
+    def advantage(self, experience: Experience) -> Tensor:
+        """Estimate the advantage of every step in an experience."""
         ...

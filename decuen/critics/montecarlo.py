@@ -4,12 +4,9 @@ Simply estimates the state values based on a Monte Carlo estimate of the expecte
 """
 
 from dataclasses import dataclass
-from typing import MutableSequence
-
-from torch import arange
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import (Tensor, Trajectory, Transition, batch_transitions,
+from decuen.structs import (Experience, Tensor, Trajectory, batch_experience,
                             tensor)
 
 
@@ -25,11 +22,26 @@ class MonteCarloCritic(Critic):
         """Initialize a Monte Carlo critic."""
         super().__init__(settings)
 
-    def learn(self, transitions: MutableSequence[Transition]) -> None:
+    def learn(self, experience: Experience) -> None:
         """Do nothing. Monte Carlo critic does not learn."""
 
-    def _advantage(self, trajectory: Trajectory) -> Tensor:
-        batch = batch_transitions(trajectory)
-        discounted_rewards = tensor([self.settings.discount_factor]).pow(arange(batch.rewards.size()[0]))
-        advantages = discounted_rewards.flip(0).cumsum(0).flip(0)  # Reverse cumulative sum (causality)
-        return advantages
+    def advantage(self, experience: Experience) -> Tensor:
+        """Estimate the advantage of every step in an experience by using a Monte Carlo sampling."""
+        if isinstance(experience, Trajectory):
+            rewards = self._calculate_trajectory_rewards(experience)
+            return rewards
+        return batch_experience(experience).rewards[:]
+
+    def _calculate_trajectory_rewards(self, trajectory: Trajectory):
+        batch = trajectory.batched
+        rewards = batch.rewards[:]
+
+        running = tensor(0.)
+        for i in reversed(range(rewards.size()[0])):
+            if rewards[i] == 0:
+                running = tensor(0.)
+                continue
+            running = running * self.settings.discount_factor + rewards[i]
+            rewards[i] = running
+
+        return rewards

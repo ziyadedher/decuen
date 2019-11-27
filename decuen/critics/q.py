@@ -12,16 +12,14 @@ Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms
 
 import copy
 from dataclasses import dataclass
-from typing import MutableSequence
 
 from gym.spaces import Discrete  # type: ignore
-from torch import from_numpy, zeros  # pylint: disable=no-name-in-module
+from torch import from_numpy, zeros_like  # pylint: disable=no-name-in-module
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import (Action, State, Tensor, Trajectory, Transition,
-                            batch_transitions)
+from decuen.structs import Action, Experience, State, Tensor, batch_experience
 from decuen.utils.module_construction import finalize_module
 
 
@@ -55,24 +53,25 @@ class QValueCritic(Critic):
         if not isinstance(self.action_space, Discrete):
             raise TypeError("action space for Q-network critic must be discrete")
 
-        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample()), self.action_space.n)
+        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample().float()),
+                                                    self.action_space.n)
         self._target_network = copy.deepcopy(self.network)
         self._target_network.eval()
 
         self.settings.optimizer.add_param_group({"params": final_layer.parameters()})
 
-    def learn(self, transitions: MutableSequence[Transition]) -> None:
-        """Update internal critic representation based on past transitions."""
+    def learn(self, experience: Experience) -> None:
+        """Update internal critic representation based on an experience."""
         self._learn_step += 1
-        if not transitions:
+        if not experience:
             return
 
-        batch = batch_transitions(transitions)
+        batch = batch_experience(experience)
 
         values = self.network(batch.states).gather(1, batch.actions.unsqueeze(1))
         new_states_not_terminal = batch.new_states[~batch.terminals]
 
-        next_values = zeros(len(transitions))
+        next_values = zeros_like(batch.rewards)
         if self.settings.double:
             chosen_actions = self._target_network(new_states_not_terminal).argmax(1, keepdims=True)
             next_values[~batch.terminals] = (self.network(new_states_not_terminal)
@@ -97,6 +96,7 @@ class QValueCritic(Critic):
         """Estimate the quality of taking an action or tensor of actions in a state."""
         return self.network(state).detach()[action]
 
-    def _advantage(self, trajectory: Trajectory) -> Tensor:
-        batch = batch_transitions(trajectory)
+    def advantage(self, experience: Experience) -> Tensor:
+        """Estimate the advantage of every step in an experience."""
+        batch = batch_experience(experience)
         return self.network(batch.states).detach().gather(1, batch.actions.unsqueeze(1))
