@@ -1,4 +1,4 @@
-"""Constructs representing states (which we conflate with observations) in the framework."""
+"""Constructs representing and helpers for states (which we conflate with observations) in the framework."""
 
 import numpy as np  # type: ignore
 from torch import Tensor, from_numpy
@@ -15,7 +15,7 @@ class State:
 
     def __init__(self, data: np.ndarray) -> None:
         """Initialize a state."""
-        self._data = from_numpy(data)
+        self._data = from_numpy(data).float()
 
     @property
     def numpy(self) -> np.ndarray:

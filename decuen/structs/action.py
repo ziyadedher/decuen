@@ -1,4 +1,4 @@
-"""Constructs representing actions in the framework."""
+"""Constructs representing and helpers for actions in the framework."""
 
 import numpy as np  # type: ignore
 from torch import Tensor, from_numpy
@@ -15,7 +15,7 @@ class Action:
 
     def __init__(self, data: np.ndarray) -> None:
         """Initialize an action."""
-        self._data = from_numpy(data)
+        self._data = from_numpy(data).float()
 
     @property
     def numpy(self) -> np.ndarray:
