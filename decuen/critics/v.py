@@ -40,10 +40,11 @@ class StateValueCritic(Critic):
             return
 
         batch = batch_experience(experience)
-
-        new_states_not_terminal = batch.new_states[~batch.terminals]
         future_values = zeros_like(batch.rewards)
-        future_values[~batch.terminals] = self.crit(new_states_not_terminal)
+
+        if (~batch.terminals).any():
+            new_states_not_terminal = batch.new_states[~batch.terminals]
+            future_values[~batch.terminals] = self.crit(new_states_not_terminal)
         target_values = batch.rewards + self.settings.discount_factor * future_values
 
         values = self.network(batch.states).squeeze(1)
@@ -60,7 +61,7 @@ class StateValueCritic(Critic):
     def advantage(self, experience: Experience) -> Tensor:
         """Estimate the advantage of every step in an experience."""
         batch = batch_experience(experience)
-        new_values = self.network(batch.new_states).detach().squeeze(1)
-        values = self.network(batch.states).detach().squeeze(1)
+        new_values = self.crit(batch.new_states)
+        values = self.crit(batch.states)
         advantages = batch.rewards + (self.settings.discount_factor * new_values) - values
         return advantages
