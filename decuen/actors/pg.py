@@ -20,6 +20,7 @@ from decuen.utils.module_construction import finalize_module
 class PGActorSettings(ActorSettings):
     """Basic common settings for all actor-learners."""
 
+    normalize: bool
     optimizer: Optimizer
 
 
@@ -53,8 +54,10 @@ class PGActor(Actor[Critic]):
         neglogs = -policies.log_prob(batch.actions)
 
         advantages = self.critic.advantage(experience)
-        advantages -= advantages.mean()
-        advantages /= advantages.std()
+        if self.settings.normalize:
+            advantages -= advantages.mean()
+            advantages /= advantages.std()
+
         loss = (neglogs * advantages).sum()
 
         self.settings.optimizer.zero_grad()
