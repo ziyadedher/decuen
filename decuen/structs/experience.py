@@ -15,8 +15,9 @@ Experience = Union[Trajectory, Sequence[Transition]]
 
 
 # TODO: create a function constructor to reduce code duplication.
+# TODO: create some function container to reduce import complexity
 
-def states(experience: Experience) -> Tensor:
+def gather_states(experience: Experience) -> Tensor:
     """Extract and stack all the states from an experience in the same order they appear in.
 
     This helper function, and the rest of the experience helper functions, are very useful when trying to pass
@@ -26,7 +27,7 @@ def states(experience: Experience) -> Tensor:
     return stack([transition.state.tensor for transition in experience])
 
 
-def actions(experience: Experience) -> Tensor:
+def gather_actions(experience: Experience) -> Tensor:
     """Extract and stack all the actions from an experience in the same order they appear in.
 
     This helper function, and the rest of the experience helper functions, are very useful when trying to pass
@@ -36,7 +37,7 @@ def actions(experience: Experience) -> Tensor:
     return stack([transition.action.tensor for transition in experience])
 
 
-def new_states(experience: Experience) -> Tensor:
+def gather_new_states(experience: Experience) -> Tensor:
     """Extract and stack all the new states from an experience in the same order they appear in.
 
     This helper function, and the rest of the experience helper functions, are very useful when trying to pass
@@ -46,7 +47,7 @@ def new_states(experience: Experience) -> Tensor:
     return stack([transition.new_state.tensor for transition in experience])
 
 
-def rewards(experience: Experience) -> Tensor:
+def gather_rewards(experience: Experience) -> Tensor:
     """Extract and stack all the rewards from an experience in the same order they appear in.
 
     This helper function, and the rest of the experience helper functions, are very useful when trying to pass
@@ -56,7 +57,7 @@ def rewards(experience: Experience) -> Tensor:
     return tensor([transition.reward for transition in experience])
 
 
-def terminals(experience: Experience) -> Tensor:
+def gather_terminals(experience: Experience) -> Tensor:
     """Extract and stack all the terminal statuses from an experience in the same order they appear in.
 
     This helper function, and the rest of the experience helper functions, are very useful when trying to pass
