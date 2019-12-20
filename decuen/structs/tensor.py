@@ -6,6 +6,7 @@ a function.
 
 import torch
 
+Tensor = torch.Tensor
 
 def tensor(*args, **kwargs) -> torch.Tensor:  # noqa
     return torch.tensor(*args, **kwargs)  # noqa
