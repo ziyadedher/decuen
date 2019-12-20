@@ -148,10 +148,20 @@ def with_context(func: FuncType) -> FuncType:
 class Contextful:
     """Thin interface class to introduce contextful state and action spaces to any class."""
 
-    state_space: Space
-    action_space: Space
+    _state_space: Space
+    _action_space: Space
 
     def __init__(self) -> None:
         """Initialize a contextful object and populate the state an action spaces based on context."""
-        self.state_space = get_context().state_space
-        self.action_space = get_context().action_space
+        self._state_space = get_context().state_space
+        self._action_space = get_context().action_space
+
+    @property
+    def state_space(self) -> Space:
+        """Access the state space associated with this environmental context."""
+        return self._state_space
+
+    @property
+    def action_space(self) -> Space:
+        """Access the action space associated with this environmental context."""
+        return self._action_space
