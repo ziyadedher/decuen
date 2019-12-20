@@ -2,12 +2,13 @@
 
 from dataclasses import dataclass
 
-from torch import from_numpy, zeros_like  # pylint: disable=no-name-in-module
+from torch import zeros_like
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import Experience, State, Tensor, batch_experience
+from decuen.structs import (Experience, State, Tensor, gather_new_states,
+                            gather_rewards, gather_states, gather_terminals)
 from decuen.utils.module_construction import finalize_module
 
 
@@ -29,8 +30,7 @@ class StateValueCritic(Critic):
         """Initialize this generic actor critic interface."""
         super().__init__(settings)
 
-        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample()).float(), 1)
-
+        final_layer, self.network = finalize_module(model, State(self.state_space.sample()), 1)
         self.settings.optimizer.add_param_group({"params": final_layer.parameters()})
 
     def learn(self, experience: Experience) -> None:
@@ -39,15 +39,18 @@ class StateValueCritic(Critic):
         if not experience:
             return
 
-        batch = batch_experience(experience)
-        future_values = zeros_like(batch.rewards)
+        states = gather_states(experience)
+        new_states = gather_new_states(experience)
+        rewards = gather_rewards(experience)
+        terminals = gather_terminals(experience)
 
-        if (~batch.terminals).any():
-            new_states_not_terminal = batch.new_states[~batch.terminals]
-            future_values[~batch.terminals] = self.crit(new_states_not_terminal)
-        target_values = batch.rewards + self.settings.discount_factor * future_values
+        next_values = zeros_like(rewards)
+        if (~terminals).any():
+            new_states_not_terminal = new_states[~terminals]
+            next_values[~terminals] = self.network(new_states_not_terminal).detach().squeeze(1)
+        target_values = rewards + self.settings.discount_factor * next_values
 
-        values = self.network(batch.states).squeeze(1)
+        values = self.network(states).squeeze(1)
 
         loss = self.settings.loss(values, target_values)
         self.settings.optimizer.zero_grad()
@@ -60,8 +63,10 @@ class StateValueCritic(Critic):
 
     def advantage(self, experience: Experience) -> Tensor:
         """Estimate the advantage of every step in an experience."""
-        batch = batch_experience(experience)
-        new_values = self.crit(batch.new_states)
-        values = self.crit(batch.states)
-        advantages = batch.rewards + (self.settings.discount_factor * new_values) - values
-        return advantages
+        states = gather_states(experience)
+        new_states = gather_new_states(experience)
+        rewards = gather_rewards(experience)
+
+        values = self.network(states).detach()
+        new_values = self.network(new_states).detach()
+        return rewards + (self.settings.discount_factor * new_values) - values

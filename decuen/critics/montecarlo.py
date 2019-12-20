@@ -6,7 +6,7 @@ Simply estimates the state values based on a Monte Carlo estimate of the expecte
 from dataclasses import dataclass
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import (Experience, Tensor, Trajectory, batch_experience,
+from decuen.structs import (Experience, Tensor, Trajectory, gather_rewards,
                             tensor)
 
 
@@ -30,11 +30,10 @@ class MonteCarloCritic(Critic):
         if isinstance(experience, Trajectory):
             rewards = self._calculate_trajectory_rewards(experience)
             return rewards
-        return batch_experience(experience).rewards[:]
+        return gather_rewards(experience)
 
     def _calculate_trajectory_rewards(self, trajectory: Trajectory):
-        batch = trajectory.batched
-        rewards = batch.rewards[:]
+        rewards = gather_rewards(trajectory)
 
         running = tensor(0.)
         for i in reversed(range(rewards.size()[0])):

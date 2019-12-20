@@ -14,12 +14,14 @@ import copy
 from dataclasses import dataclass
 
 from gym.spaces import Discrete  # type: ignore
-from torch import from_numpy, zeros_like  # pylint: disable=no-name-in-module
+from torch import zeros_like
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import Action, Experience, State, Tensor, batch_experience
+from decuen.structs import (Action, Experience, State, Tensor, gather_actions,
+                            gather_new_states, gather_rewards, gather_states,
+                            gather_terminals)
 from decuen.utils.module_construction import finalize_module
 
 
@@ -53,8 +55,7 @@ class QValueCritic(Critic):
         if not isinstance(self.action_space, Discrete):
             raise TypeError("action space for Q-network critic must be discrete")
 
-        final_layer, self.network = finalize_module(model, from_numpy(self.state_space.sample().float()),
-                                                    self.action_space.n)
+        final_layer, self.network = finalize_module(model, State(self.state_space.sample()), self.action_space.n)
         self._target_network = copy.deepcopy(self.network)
         self._target_network.eval()
 
@@ -66,19 +67,23 @@ class QValueCritic(Critic):
         if not experience:
             return
 
-        batch = batch_experience(experience)
+        states = gather_states(experience)
+        actions = gather_actions(experience)
+        new_states = gather_new_states(experience)
+        rewards = gather_rewards(experience)
+        terminals = gather_terminals(experience)
 
-        values = self.network(batch.states).gather(1, batch.actions.unsqueeze(1))
-        new_states_not_terminal = batch.new_states[~batch.terminals]
+        values = self.network(states).gather(1, actions.unsqueeze(1))
+        new_states_not_terminal = new_states[~terminals]
 
-        next_values = zeros_like(batch.rewards)
+        next_values = zeros_like(rewards)
         if self.settings.double:
             chosen_actions = self._target_network(new_states_not_terminal).argmax(1, keepdims=True)
-            next_values[~batch.terminals] = (self.network(new_states_not_terminal)
-                                             .gather(1, chosen_actions).squeeze(1).detach())
+            next_values[~terminals] = (self.network(new_states_not_terminal)
+                                       .gather(1, chosen_actions).detach().squeeze(1))
         else:
-            next_values[~batch.terminals] = self._target_network(new_states_not_terminal).max(1)[0].detach()
-        target_values = (batch.rewards + (self.settings.discount_factor * next_values)).unsqueeze(1)
+            next_values[~terminals] = self._target_network(new_states_not_terminal).detach().max(1)[0]
+        target_values = (rewards + (self.settings.discount_factor * next_values)).unsqueeze(1)
 
         loss = self.settings.loss(values, target_values)
         self.settings.optimizer.zero_grad()
@@ -98,5 +103,6 @@ class QValueCritic(Critic):
 
     def advantage(self, experience: Experience) -> Tensor:
         """Estimate the advantage of every step in an experience."""
-        batch = batch_experience(experience)
-        return self.network(batch.states).detach().gather(1, batch.actions.unsqueeze(1))
+        states = gather_states(experience)
+        actions = gather_actions(experience)
+        return self.network(states).detach().gather(1, actions.unsqueeze(1))
