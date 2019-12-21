@@ -1,13 +1,13 @@
 """Implementation of an epsilon-greedy action selection strategy."""
 
 from abc import ABC, abstractmethod
-from typing import Callable, ClassVar, Optional
+from typing import Callable, ClassVar, List, Optional, Union
 
 from decuen.actors.strats._strategy import Strategy
 from decuen.actors.strats.greedy import GreedyStrategy
 from decuen.actors.strats.uniform import UniformStrategy
 from decuen.dists import Categorical
-from decuen.structs import Action, Tensor
+from decuen.structs import Tensor
 from decuen.utils.function_property import FunctionProperty
 
 
@@ -79,9 +79,9 @@ class ExponentialEpsilonDecay(EpsilonDecay):
     def decay(self, value: float) -> float:
         """Return the value multiplied by the exponential decay factor."""
         return value * self.factor
+# pylint: enable=too-few-public-methods
 
 
-# pylint: disable=too-few-public-methods
 class EpsilonGreedyStrategy(Strategy):
     """Epsilon-greedy action selection strategy."""
 
@@ -101,14 +101,14 @@ class EpsilonGreedyStrategy(Strategy):
         self.min_epsilon = min_epsilon
         self._decay = decay if decay else NoEpsilonDecay()
 
-    def act(self, action_values: Tensor) -> Action:
+    def params(self, values: Union[List[float], List[List[float]]]) -> Tensor:
         """Generate parameters for a categorical action distribution based on a epsilon-greedy strategy.
 
         Decays epsilon according to the decay mechanism after choosing an action.
         """
-        probs = (1 - self.epsilon) * self.greedy.act(action_values) + self.epsilon * self.random.act(action_values)
+        params = (1 - self.epsilon) * self.greedy.params(values) + self.epsilon * self.random.params(values)
         self.decay()
-        return probs
+        return params
 
     def decay(self) -> None:
         """Decay the epsilon according to the decaying technique."""

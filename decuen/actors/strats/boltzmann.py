@@ -3,10 +3,13 @@
 [1] http://incompleteideas.net/book/ebook/node17.html
 """
 
+from typing import List, Union, cast
+
+from torch import stack
 from torch.distributions import Categorical
 
 from decuen.actors.strats._strategy import Strategy
-from decuen.structs import Tensor
+from decuen.structs import Tensor, tensor
 
 
 # pylint: disable=too-few-public-methods
@@ -18,10 +21,15 @@ class BoltzmannStrategy(Strategy):
         super().__init__(Categorical)
         self.temperature = temperature
 
-    def act(self, action_values: Tensor) -> Tensor:
+    def params(self, values: Union[List[float], List[List[float]]]) -> Tensor:
         """Generate the parameters for a categorical action distribution based on the action-value logits.
 
         Computes a softmax over the action-values and returns those as parameters to a categorical distribution.
         """
-        action_values /= self.temperature
-        return action_values.softmax(0)
+        if isinstance(values, list) and isinstance(values[0], float):
+            values = [cast(List[float], values)]
+
+        values_tensor = tensor(values)
+        values_tensor /= self.temperature
+        return stack([vals.softmax(0) for vals in values_tensor.unbind()])
+# pylint: enable=too-few-public-methods

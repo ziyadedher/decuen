@@ -1,7 +1,7 @@
 """Interfaces for arbitrary action selection strategies."""
 
 from abc import ABC, abstractmethod
-from typing import Type
+from typing import List, Type, Union
 
 from decuen.dists import Distribution
 from decuen.structs import Tensor
@@ -23,6 +23,6 @@ class Strategy(ABC, Contextful):
         self.distribution_type = distribution_type
 
     @abstractmethod
-    def act(self, action_values: Tensor) -> Tensor:
+    def params(self, values: Union[List[float], List[List[float]]]) -> Tensor:
         """Generate the parameters for the strategy action distribution based on the values of actions."""
         ...
