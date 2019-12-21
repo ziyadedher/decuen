@@ -16,7 +16,7 @@ from decuen.structs import Experience, State, Tensor, gather_actions, tensor
 from decuen.utils.module_construction import finalize_module
 
 
-@dataclass
+@dataclass(frozen=True)
 class PGActorSettings(ActorSettings):
     """Basic common settings for all actor-learners."""
 

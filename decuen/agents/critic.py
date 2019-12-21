@@ -9,7 +9,7 @@ from decuen.critics import QValueCritic
 from decuen.memories import Memory
 
 
-@dataclass
+@dataclass(frozen=True)
 class CriticAgentSettings(AgentSettings, StrategyActorSettings):
     """Settings for critic agents."""
 

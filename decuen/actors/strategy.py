@@ -11,7 +11,7 @@ from decuen.critics import QValueCritic
 from decuen.structs import Action, Experience, State, Tensor
 
 
-@dataclass
+@dataclass(frozen=True)
 class StrategyActorSettings(ActorSettings):
     """Settings for strategy-based actors."""
 
