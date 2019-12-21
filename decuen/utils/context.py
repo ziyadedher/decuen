@@ -165,3 +165,4 @@ class Contextful:
     def action_space(self) -> Space:
         """Access the action space associated with this environmental context."""
         return self._action_space
+# pylint: enable=too-few-public-methods

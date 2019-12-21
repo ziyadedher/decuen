@@ -116,9 +116,9 @@ class Actor(Generic[CriticType], ABC, Contextful):
         """
         if isinstance(states, State):
             policy = self.policy(states)
-            return policy.sample().unbind()
+            return Action(policy.sample()[0].numpy())
         policy = self.policy(states, stack=True)
-        return list(policy.sample().unbind())
+        return list(Action(action.numpy()) for action in policy.sample().unbind())
 
     # XXX: possibly return loss or some other metric?
     @abstractmethod
