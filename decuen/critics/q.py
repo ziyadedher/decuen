@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import List, Union, overload
 
 from gym.spaces import Discrete  # type: ignore
-from torch import zeros_like
+from torch import stack, zeros_like
 from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
@@ -78,12 +78,13 @@ class QValueCritic(Critic):
         new_states_not_terminal = new_states[~terminals]
 
         next_values = zeros_like(rewards)
-        if self.settings.double:
-            chosen_actions = self._target_network(new_states_not_terminal).argmax(1, keepdims=True)
-            next_values[~terminals] = (self.network(new_states_not_terminal)
-                                       .gather(1, chosen_actions).detach().squeeze(1))
-        else:
-            next_values[~terminals] = self._target_network(new_states_not_terminal).detach().max(1)[0]
+        if new_states_not_terminal.size()[0] != 0:
+            if self.settings.double:
+                chosen_actions = self._target_network(new_states_not_terminal).detach().argmax(1, keepdims=True)
+                next_values[~terminals] = (self.network(new_states_not_terminal)
+                                           .gather(1, chosen_actions).detach().squeeze(1))
+            else:
+                next_values[~terminals] = self._target_network(new_states_not_terminal).detach().max(1)[0]
         target_values = (rewards + (self.settings.discount_factor * next_values)).unsqueeze(1)
 
         loss = self.settings.loss(values, target_values)
@@ -119,8 +120,8 @@ class QValueCritic(Critic):
             states = [states]
             actions = [actions]
 
-        state_tensors = [state.tensor for state in states]
-        action_tensors = [action.tensor for action in actions]
+        state_tensors = stack([state.tensor for state in states])
+        action_tensors = stack([action.tensor for action in actions]).long()
         return self.network(state_tensors).detach()[:, action_tensors]
 
     def advantage(self, experience: Experience) -> List[float]:
