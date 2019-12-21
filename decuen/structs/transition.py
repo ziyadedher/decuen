@@ -8,7 +8,8 @@ from decuen.structs.action import Action
 from decuen.structs.state import State
 
 
-@dataclass
+# pylint: disable=too-many-instance-attributes
+@dataclass(frozen=True)
 class Transition:
     """Representation of a transition.
 
@@ -27,3 +28,4 @@ class Transition:
     behavior: Optional[Distribution] = None
     state_value: Optional[float] = None
     action_value: Optional[float] = None
+# pylint: enable=too-many-instance-attributes
