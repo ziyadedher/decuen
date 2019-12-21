@@ -1,14 +1,14 @@
 """Implementation of a strategy-based actor."""
 
 from dataclasses import dataclass
+from typing import List
 
 from gym.spaces import Discrete  # type: ignore
-from torch import arange
 
 from decuen.actors._actor import Actor, ActorSettings
 from decuen.actors.strats import Strategy
 from decuen.critics import QValueCritic
-from decuen.structs import Experience, State, Tensor
+from decuen.structs import Action, Experience, State, Tensor
 
 
 @dataclass
@@ -32,11 +32,10 @@ class StrategyActor(Actor[QValueCritic]):
     def learn(self, experience: Experience) -> None:
         """Do nothing. Learning is not supported for strategy-based actors."""
 
-    def _gen_policy_params(self, state: State) -> Tensor:
-        """Generate policy parameters on-the-fly based on an environment state."""
+    def _params(self, states: List[State]) -> Tensor:
         if not self.critic:
             raise ValueError("strategy actor must be assigned a critic")
         if not isinstance(self.action_space, Discrete):
             raise NotImplementedError("strategy actor does not support non-discrete action spaces")
 
-        return self.strategy.act(self.critic.crit(state, arange(self.action_space.n)))
+        return self.strategy.params(self.critic.crit(states, [Action(i) for i in range(self.action_space.n)]))
