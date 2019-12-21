@@ -8,7 +8,7 @@ import numpy as np  # type: ignore
 from decuen.actors import Actor
 from decuen.critics import Critic
 from decuen.memories import Memory
-from decuen.structs import Action, State, Trajectory, Transition, tensor
+from decuen.structs import Action, State, Trajectory, Transition
 from decuen.utils.context import Contextful
 
 
@@ -36,7 +36,7 @@ class Agent(Contextful):
     # Current state of the agent
     _state: Optional[State]
     # Action taken at that state
-    _action: Optional[State]
+    _action: Optional[Action]
     # Current agent trajectory
     _trajectory: List[Transition]
 
@@ -56,7 +56,7 @@ class Agent(Contextful):
 
     def init(self, state: np.ndarray) -> np.ndarray:
         """Initialize an agent at the start of a new episode."""
-        return self._step(tensor(state.astype(np.float32)), None, None).numpy()
+        return self._step(State(state), None, None).numpy
 
     def step(self, state: np.ndarray, reward: float, terminal: bool) -> np.ndarray:
         """Step based on a new state, a terminal state signal, and a reward signal.
@@ -65,10 +65,10 @@ class Agent(Contextful):
         was called. The reward signal corresponds to the transition that caused the migration to this state and the
         terminal signal corresponds to the currently inputted state.
         """
-        return self._step(tensor(state.astype(np.float32)), reward, terminal).numpy()
+        return self._step(State(state), reward, terminal).numpy
 
     def _step(self, state: State, reward: Optional[float], terminal: Optional[bool]) -> Action:
-        action = self._act(state).squeeze(0)
+        action = self._act(state)
 
         # If we have no history in this episode, we still don't have anything to store
         if self._state is None or self._action is None or reward is None or terminal is None:
@@ -97,14 +97,14 @@ class Agent(Contextful):
 
     def act(self, state: np.ndarray) -> np.ndarray:
         """Generate an action to perform based on a state."""
-        return self._act(tensor(state.astype(np.float32))).numpy()
+        return self._act(State(state)).numpy
 
     def _act(self, state: State) -> Action:
         """Act internally based on a state.
 
         Override this instead of `act` in order to preserve compatibility layers.
         """
-        return self.actor.act(state).sample()
+        return self.actor.act(state)
 
     def learn(self) -> None:
         """Learn or improve this agent from memory."""
