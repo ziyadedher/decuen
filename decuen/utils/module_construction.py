@@ -14,7 +14,7 @@ def finalize_module(module: Module, in_example: State, out_size: int) -> Tuple[M
     output of the given size. Returns the final added layer and the newly constructed module.
     """
     try:
-        size = module(in_example).size()
+        size = module(in_example.tensor).size()
     except RuntimeError:
         raise ValueError("given model is incompatible with the state space")
     if len(size) != 1:
