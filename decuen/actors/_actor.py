@@ -2,8 +2,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from functools import reduce
-from typing import Generic, Optional, Type, TypeVar
+from functools import cached_property, reduce
+from typing import (Generic, List, Literal, Optional, Type, TypeVar, Union,
+                    overload)
 
 from gym.spaces import Box, Discrete  # type: ignore
 from torch import diag_embed
@@ -11,11 +12,11 @@ from torch.nn.functional import softplus
 
 from decuen.critics import Critic
 from decuen.dists import Categorical, Distribution, MultivariateNormal, Normal
-from decuen.structs import Experience, State, Tensor
+from decuen.structs import Action, Experience, State, Tensor
 from decuen.utils.context import Contextful
 
 
-@dataclass
+@dataclass(frozen=True)
 class ActorSettings:
     """Basic common settings for all actor-learners."""
 
@@ -27,6 +28,7 @@ CriticType = TypeVar("CriticType", bound=Critic)
 
 
 class Actor(Generic[CriticType], ABC, Contextful):
+    # TODO: update docstring
     """Generic abstract actor-learner interface.
 
     This abstraction provides interfaces for the two main functionalities of an actor-learner:
@@ -61,11 +63,63 @@ class Actor(Generic[CriticType], ABC, Contextful):
         """
         self._critic = critic
 
-    def act(self, state: State) -> Distribution:
-        """Construct a parameterized policy and return the generated distribution."""
-        return self._gen_behaviour(self._gen_policy_params(state))
+    @overload
+    def policy(self, states: State, *, stack: bool = False) -> Distribution: ...  # noqa
 
-    # TODO: support learning from transitions
+    @overload
+    def policy(self, states: List[State], *, stack: Literal[True]) -> Distribution: ...  # noqa
+
+    @overload
+    def policy(self, states: List[State], *, stack: Literal[False]) -> List[Distribution]: ...  # noqa
+
+    @overload
+    def policy(self, states: List[State], *, stack: bool = False) -> Union[Distribution, List[Distribution]]: ...  # noqa
+
+    def policy(self, states: Union[State, List[State]], *,  # noqa
+               stack: bool = False) -> Union[Distribution, List[Distribution]]:
+        """Construct parameterized policies that can be sampled to choose actions based on the given states.
+
+        This method provides an interface to generating actions from this agent by sampling from an action distribution.
+        To perform a more streamlined action selection in cases where the underlying behavioural distribution is not
+        needed, use `Agent.act` instead.
+
+        When given a single state, this method produces a single distribution over the agent's action space representing
+        the behavioural policy under that state.
+
+        When given a list of states, this method, by default, produces a respective list of distributions each over the
+        agent's action space representing the behavioural policies under the different states. If <stack> is set to
+        `True`, then the different distributions are combined into a single distribution that is more efficient to
+        sample from than from each distribution in sequence. This can be used in cases where multiple actions across
+        different states are needed at the same time as is the case with most multi-worker trainers.
+        """
+        if isinstance(states, State):
+            if stack is not False:
+                print("setting <stack> has no effect when not given a list of states")
+            return self._behaviour(self._params([states]))
+
+        params = self._params(states)
+        return self._behaviour(params) if stack else [self._behaviour(subparams) for subparams in params.unbind()]
+
+    @overload
+    def act(self, states: State) -> Action: ...  # noqa
+
+    @overload
+    def act(self, states: List[State]) -> List[Action]: ...  # noqa
+
+    def act(self, states: Union[State, List[State]]) -> Union[Action, List[Action]]:  # noqa
+        """Choose actions to perform based on the given states.
+
+        When given a single state, this method produces a single action sampled from the underlying generated policy.
+
+        When given a list of states, this method produces a respective list of actions sampled from the generated
+        policies.
+        """
+        if isinstance(states, State):
+            policy = self.policy(states)
+            return policy.sample().unbind()
+        policy = self.policy(states, stack=True)
+        return list(policy.sample().unbind())
+
     # XXX: possibly return loss or some other metric?
     @abstractmethod
     def learn(self, experience: Experience) -> None:
@@ -73,12 +127,12 @@ class Actor(Generic[CriticType], ABC, Contextful):
         ...
 
     @abstractmethod
-    def _gen_policy_params(self, state: State) -> Tensor:
-        """Generate policy parameters on-the-fly based on an environment state."""
+    def _params(self, states: List[State]) -> Tensor:
+        """Generate policy parameters on-the-fly based on the given states."""
         ...
 
-    @property
-    def _num_policy_params(self) -> int:
+    @cached_property
+    def _num_params(self) -> int:
         """Calculate the number of parameters needed for the policy."""
         if not any(isinstance(self.action_space, space_type) for space_type in (Discrete, Box)):
             raise TypeError("actors only support Discrete, Box action spaces")
@@ -104,14 +158,11 @@ class Actor(Generic[CriticType], ABC, Contextful):
 
         raise NotImplementedError("actors do not support this action distribution yet")
 
-    def _gen_behaviour(self, params: Tensor) -> Distribution:
-        """Generate the behavioural policy based on the given parameters and the distribution family of this actor."""
+    def _behaviour(self, params: Tensor) -> Distribution:
+        """Generate a behavioural policy based on the given parameters and the distribution family of this actor."""
         # TODO: check for parameter size mismatches
-        # TODO: support params being for multiple different distributions
 
-        if len(params.size()) == 1:
-            params = params.unsqueeze(0)
-        elif len(params.size()) > 2:
+        if len(params.size()) != 2:
             # FIXME: better error message
             raise ValueError("unknown dimensionality")
 
