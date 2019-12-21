@@ -4,10 +4,10 @@ Simply estimates the state values based on a Monte Carlo estimate of the expecte
 """
 
 from dataclasses import dataclass
+from typing import List
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import (Experience, Tensor, Trajectory, gather_rewards,
-                            tensor)
+from decuen.structs import Experience, Trajectory, gather_rewards
 
 
 @dataclass
@@ -25,22 +25,21 @@ class MonteCarloCritic(Critic):
     def learn(self, experience: Experience) -> None:
         """Do nothing. Monte Carlo critic does not learn."""
 
-    def advantage(self, experience: Experience) -> Tensor:
+    def advantage(self, experience: Experience) -> List[float]:
         """Estimate the advantage of every step in an experience by using a Monte Carlo sampling."""
         if isinstance(experience, Trajectory):
-            rewards = self._calculate_trajectory_rewards(experience)
-            return rewards
-        return gather_rewards(experience)
+            return self._calculate_trajectory_rewards(experience)
+        return gather_rewards(experience).tolist()
 
     def _calculate_trajectory_rewards(self, trajectory: Trajectory):
-        rewards = gather_rewards(trajectory)
+        rewards = gather_rewards(trajectory).tolist()
 
-        running = tensor(0.)
-        for i in reversed(range(rewards.size()[0])):
-            if rewards[i] == 0:
-                running = tensor(0.)
+        running = 0
+        for i, reward in reversed(list(enumerate(rewards))):
+            if reward == 0:
+                running = 0
                 continue
-            running = running * self.settings.discount_factor + rewards[i]
+            running = running * self.settings.discount_factor + reward
             rewards[i] = running
 
         return rewards

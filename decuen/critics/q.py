@@ -12,6 +12,7 @@ Implements both deep Q-learning [1, 2] and double deep Q-learning [3] algorithms
 
 import copy
 from dataclasses import dataclass
+from typing import List, Union, overload
 
 from gym.spaces import Discrete  # type: ignore
 from torch import zeros_like
@@ -19,7 +20,7 @@ from torch.nn import Module
 from torch.optim import Optimizer  # type: ignore
 
 from decuen.critics._critic import Critic, CriticSettings
-from decuen.structs import (Action, Experience, State, Tensor, gather_actions,
+from decuen.structs import (Action, Experience, State, gather_actions,
                             gather_new_states, gather_rewards, gather_states,
                             gather_terminals)
 from decuen.utils.module_construction import finalize_module
@@ -97,12 +98,33 @@ class QValueCritic(Critic):
         if self._learn_step % self.settings.target_update == 0:
             self._target_network.load_state_dict(self.network.state_dict())
 
-    def crit(self, state: State, action: Action) -> Tensor:
-        """Estimate the quality of taking an action or tensor of actions in a state."""
-        return self.network(state).detach()[action]
+    @overload
+    def crit(self, states: State, actions: Action) -> float: ...  # noqa
 
-    def advantage(self, experience: Experience) -> Tensor:
+    @overload
+    def crit(self, states: List[State], actions: List[Action]) -> List[float]: ...  # noqa
+
+    @overload
+    def crit(self, states: State, actions: List[Action]) -> List[float]: ...  # noqa
+
+    @overload
+    def crit(self, states: List[State], actions: List[Action]) -> List[List[float]]: ...  # noqa
+
+    def crit(self, states: Union[State, List[State]],  # noqa
+             actions: Union[Action, List[Action]]) -> Union[float, List[float], List[List[float]]]:
+        """Estimate the quality of taking an action in a state."""
+        if isinstance(states, State) or isinstance(actions, Action):
+            if isinstance(states, list) or isinstance(actions, list):
+                raise TypeError("mismatched states and actions type")
+            states = [states]
+            actions = [actions]
+
+        state_tensors = [state.tensor for state in states]
+        action_tensors = [action.tensor for action in actions]
+        return self.network(state_tensors).detach()[:, action_tensors]
+
+    def advantage(self, experience: Experience) -> List[float]:
         """Estimate the advantage of every step in an experience."""
         states = gather_states(experience)
         actions = gather_actions(experience)
-        return self.network(states).detach().gather(1, actions.unsqueeze(1))
+        return self.network(states).detach().gather(1, actions.unsqueeze(1)).tolist()

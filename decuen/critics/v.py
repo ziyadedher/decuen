@@ -1,6 +1,7 @@
 """Deep state value action critics."""
 
 from dataclasses import dataclass
+from typing import List
 
 from torch import zeros_like
 from torch.nn import Module
@@ -61,7 +62,7 @@ class StateValueCritic(Critic):
         """Estimate the quality of a state or tensor of states."""
         return self.network(state).detach().squeeze(1)
 
-    def advantage(self, experience: Experience) -> Tensor:
+    def advantage(self, experience: Experience) -> List[float]:
         """Estimate the advantage of every step in an experience."""
         states = gather_states(experience)
         new_states = gather_new_states(experience)
@@ -69,4 +70,4 @@ class StateValueCritic(Critic):
 
         values = self.network(states).detach()
         new_values = self.network(new_states).detach()
-        return rewards + (self.settings.discount_factor * new_values) - values
+        return (rewards + (self.settings.discount_factor * new_values) - values).tolist()

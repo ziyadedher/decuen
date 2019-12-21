@@ -2,8 +2,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import List
 
-from decuen.structs import Experience, Tensor
+from decuen.structs import Experience
 from decuen.utils.context import Contextful
 
 
@@ -45,6 +46,6 @@ class Critic(ABC, Contextful):
         ...
 
     @abstractmethod
-    def advantage(self, experience: Experience) -> Tensor:
+    def advantage(self, experience: Experience) -> List[float]:
         """Estimate the advantage of every step in an experience."""
         ...
